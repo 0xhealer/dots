@@ -21,6 +21,23 @@ layout {
     }
 }
 
+// Blur -- niri 26.04 (April 2026) added blur via the ext-background-effect
+// protocol. Apps/shells that support it natively (Noctalia, Vicinae, Foot,
+// Kitty, Ghostty, Quickshell per niri's own release notes) get it with NO
+// config needed here at all. For anything else, niri exposes manual blur
+// via window-rule/layer-rule blocks -- but I could not find a confirmed
+// KDL key name for it (this feature is ~4 months old at time of writing
+// and the wiki examples I found didn't show the exact syntax). The block
+// below is commented out because I will not ship a guessed key in a config
+// you're about to run -- check https://github.com/YaLTeR/niri/wiki (or
+// `niri msg` help) for the real key, likely something like `blur` inside
+// window-rule / layer-rule, then uncomment and fix:
+//
+// window-rule {
+//     match app-id=".*"
+//     // blur true  <- confirm real key name before uncommenting
+// }
+
 // NOTE: "qs" "-c" "noctalia-shell" is the v4 (Quickshell) launch command.
 // Noctalia v5 dropped Quickshell/Qt -- if the AUR package is v5 this is
 // wrong. Check `noctalia-shell --version` before trusting this.
@@ -34,6 +51,11 @@ hotkey-overlay {
 binds {
     Mod+T { spawn "kitty"; }
     Mod+D hotkey-overlay-title="Noctalia launcher" { spawn "qs" "-c" "noctalia-shell" "--launcher"; }
+    // Vicinae as a secondary launcher (Noctalia's is primary on Mod+D) --
+    // installed via packages/aur.txt but this invocation is a guess, not
+    // confirmed against Vicinae's actual CLI/usage docs.
+    Mod+Shift+D { spawn "vicinae"; }
+    Mod+M { spawn "spotify"; }
     Mod+E { spawn "thunar"; }
     Mod+B { spawn "zen-browser"; }
 

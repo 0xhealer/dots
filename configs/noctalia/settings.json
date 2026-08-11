@@ -10,6 +10,17 @@
     "directory": "~/Pictures/Wallpapers",
     "transitionOnStartup": true
   },
+  "templates": {
+    "_comment": "THIS was the actual bug last time -- Noctalia defaults activeTemplates to an empty list, so wallpaper-driven colors were generated but never written into any app's config until you list the app here. Confirmed real template ids: kitty, niri, gtk3, gtk4, qt. For built-in templates like these, Noctalia writes the color file AND edits the app's own config to include it automatically -- no manual kitty.conf edit needed (that's only required for user-defined templates, which this isn't).",
+    "activeTemplates": [
+      { "id": "kitty", "active": true },
+      { "id": "niri", "active": true },
+      { "id": "gtk3", "active": true },
+      { "id": "gtk4", "active": true },
+      { "id": "qt", "active": true }
+    ],
+    "enableUserTheming": false
+  },
   "bar": {
     "position": "top"
   }
