@@ -34,7 +34,7 @@ iwr -useb https://raw.githubusercontent.com/0xhealer/dotfiles/main/bootstrap.ps1
 
 ### Linux
 ```shell
-curl -fsSL "https://raw.githubusercontent.com/0xhealer/dotfiles/main/bootstrap.sh" | bash
+curl -fsSL "https://raw.githubusercontent.com/0xhealer/dots/main/bootstrap.sh" | bash
 ```
 
 ## Layout

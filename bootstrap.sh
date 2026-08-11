@@ -3,7 +3,7 @@
 set -euo pipefail
 
 REPO_OWNER="0xhealer"
-REPO_NAME="dotfiles"
+REPO_NAME="dots"
 
 TEMP_ROOT="$(mktemp -d "/tmp/${REPO_NAME}-XXXXXX")"
 ARCHIVE_URL="https://github.com/${REPO_OWNER}/${REPO_NAME}/archive/refs/heads/main.tar.gz"
