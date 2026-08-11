@@ -19,7 +19,8 @@ Mod key = Super on both compositors.
 | Terminal             | `Mod+T` and `Mod+Return`, both -> exec_cmd(terminal)              | `Mod+T` and `Mod+Return`, both -> spawn "kitty"             | Two keys, same action |
 | Terminal (VM testing)   | `Mod+Shift+Return` -> exec_cmd("foot")                            | `Mod+Shift+Return { spawn "foot"; }`                         | TEMPORARY -- remove this bind + foot from pacman.txt once off the VM |
 | App launcher          | `Mod+D` and `Mod+Space`, both -> exec_cmd("qs -c noctalia-shell --launcher") | `Mod+D` and `Mod+Space`, both -> same spawn        | Confirmed CLI flag |
-| Secondary launcher      | `hl.bind(mainMod.." + SHIFT + D", hl.dsp.exec_cmd("vicinae"))`     | `Mod+Shift+D { spawn "vicinae"; }`                          | UNVERIFIED invocation -- guessed, not checked against Vicinae's own docs |
+| Secondary launcher      | `exec_cmd("vicinae toggle")`, plus `vicinae server` autostarted    | `spawn "vicinae" "toggle"`, plus `vicinae` `server` autostarted | FIXED -- was bare "vicinae" with no server running, confirmed real invocation from Vicinae's own docs |
+| Cheatsheet             | `Mod+Shift+Slash` -> `kitty -e less ~/.config/keybindings.txt`     | `Mod+Shift+Slash { show-hotkey-overlay; }`                   | Niri has this natively with app-name titles; Hyprland uses a static file (same pattern as the NixOS box) |
 | Music (Spotify)         | `hl.bind(mainMod.." + M", hl.dsp.exec_cmd("spotify"))`             | `Mod+M { spawn "spotify"; }`                                | |
 | File manager          | `hl.bind(mainMod.." + E", hl.dsp.exec_cmd(fileManager))`           | `Mod+E { spawn "thunar"; }`                                | |
 | Browser               | `hl.bind(mainMod.." + B", hl.dsp.exec_cmd(browser))`               | `Mod+B { spawn "zen-browser"; }`                           | |
@@ -43,6 +44,12 @@ Mod key = Super on both compositors.
   ext-background-effect. Kitty, Noctalia, and Vicinae are all listed by
   niri's own release notes as already supporting it with zero config on
   the niri side. Nothing needed here for this setup specifically.
+
+## Shell
+- fish is the default login shell throughout (`functions/11-fish.sh`,
+  module name "fish"), with starship wired in via
+  `configs/shell/config.fish` (`starship init fish | source`) instead of
+  fish's own prompt/greeting.
 
 ## Known gaps -- do not assume parity
 - Noctalia v4 (Quickshell/Qt) and v5 (beta) have different launch

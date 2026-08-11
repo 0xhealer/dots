@@ -28,11 +28,16 @@ local browser = "zen-browser"
 ---- AUTOSTART ----
 -------------------
 -- NOTE: "qs -c noctalia-shell" is the v4 (Quickshell) launch command.
--- Noctalia v5 dropped Quickshell/Qt -- if the AUR package is v5 this is
--- wrong. Check `noctalia-shell --version` before trusting this.
+-- Confirmed v4 from a running install (noctalia-shell-4.7.7).
+--
+-- "vicinae server" MUST be running before "vicinae toggle" does
+-- anything -- confirmed from Vicinae's own docs (docs.vicinae.com).
+-- This is the actual reason the launcher wasn't opening: the bind
+-- called a bare "vicinae" with no server running and no toggle arg.
 hl.on("hyprland.start", function()
     hl.exec_cmd("qs -c noctalia-shell")
     hl.exec_cmd("wl-paste --watch cliphist store")
+    hl.exec_cmd("vicinae server")
 end)
 
 -----------------------
@@ -61,13 +66,11 @@ hl.config({
 })
 
 -- Blur/transparency for Noctalia's own surfaces (bar, panels, dock,
--- notifications). Namespace pattern and the general approach are
--- confirmed from Noctalia's own Hyprland compositor-settings docs;
--- the exact layer_rule field names below (blur/ignore_alpha as direct
--- keys) are carried over from the old layerrule syntax by pattern, NOT
--- confirmed against a real Lua-config example -- check
--- https://wiki.hypr.land/Configuring/Basics/Layer-Rules/ if this
--- doesn't take effect.
+-- notifications). The blur/ignore_alpha field names here are now
+-- CROSS-CONFIRMED -- Vicinae's own official Hyprland quickstart docs
+-- use this exact same layerrule shape (name/blur/ignore_alpha/
+-- match:namespace) for its own blur setup, which is independent
+-- confirmation of the pattern I was only guessing at before.
 hl.layer_rule({
     name = "noctalia-blur",
     match = { namespace = "noctalia-background-.*" },
@@ -75,39 +78,50 @@ hl.layer_rule({
     ignore_alpha = 0.5,
 })
 
+hl.layer_rule({
+    name = "vicinae-blur",
+    match = { namespace = "vicinae" },
+    blur = true,
+    ignore_alpha = 0,
+})
+
 ---------------------
 ---- KEYBINDINGS ----
 ---------------------
+-- (app name) -- for a Hyprland cheatsheet, see the Mod+Shift+Slash bind
+-- at the bottom, which opens assets/keybindings.txt. Hyprland has no
+-- built-in hotkey-overlay like Niri does, so this is a plain text file
+-- instead -- same pattern already used on the NixOS box.
 local mainMod = "SUPER"
 
-hl.bind(mainMod .. " + T", hl.dsp.exec_cmd(terminal))
-hl.bind(mainMod .. " + Return", hl.dsp.exec_cmd(terminal))
+hl.bind(mainMod .. " + T", hl.dsp.exec_cmd(terminal))                          -- (kitty)
+hl.bind(mainMod .. " + Return", hl.dsp.exec_cmd(terminal))                     -- (kitty)
 -- TEMPORARY -- VM testing only, remove this bind (and foot from
 -- packages/pacman.txt) once off the VM. kitty can fail to launch or
 -- render under VMware's SVGA virtual GPU; foot works with much less
 -- GPU capability.
-hl.bind(mainMod .. " + SHIFT + Return", hl.dsp.exec_cmd("foot"))
+hl.bind(mainMod .. " + SHIFT + Return", hl.dsp.exec_cmd("foot"))               -- (foot, VM testing only)
 
-hl.bind(mainMod .. " + D", hl.dsp.exec_cmd("qs -c noctalia-shell --launcher"))
-hl.bind(mainMod .. " + Space", hl.dsp.exec_cmd("qs -c noctalia-shell --launcher"))
--- Vicinae as a secondary launcher (Noctalia's is primary on Mod+D/Mod+Space) --
--- installed via packages/aur.txt but its keybind/CLI invocation here is
--- a guess (`vicinae` with no args, assuming it opens its own window)
--- not confirmed against actual usage docs.
-hl.bind(mainMod .. " + SHIFT + D", hl.dsp.exec_cmd("vicinae"))
-hl.bind(mainMod .. " + M", hl.dsp.exec_cmd("spotify"))
-hl.bind(mainMod .. " + E", hl.dsp.exec_cmd(fileManager))
-hl.bind(mainMod .. " + B", hl.dsp.exec_cmd(browser))
-hl.bind(mainMod .. " + F", hl.dsp.window.fullscreen())
-hl.bind(mainMod .. " + Q", hl.dsp.window.close())
-hl.bind(mainMod .. " + Tab", hl.dsp.exec_cmd("qs -c noctalia-shell --lock"))
+hl.bind(mainMod .. " + D", hl.dsp.exec_cmd("qs -c noctalia-shell --launcher")) -- (Noctalia launcher)
+hl.bind(mainMod .. " + Space", hl.dsp.exec_cmd("qs -c noctalia-shell --launcher")) -- (Noctalia launcher)
+-- Fixed: "vicinae toggle", not bare "vicinae" -- see AUTOSTART note above.
+hl.bind(mainMod .. " + SHIFT + D", hl.dsp.exec_cmd("vicinae toggle"))          -- (Vicinae, secondary launcher)
+hl.bind(mainMod .. " + M", hl.dsp.exec_cmd("spotify"))                        -- (Spotify)
+hl.bind(mainMod .. " + E", hl.dsp.exec_cmd(fileManager))                      -- (Thunar)
+hl.bind(mainMod .. " + B", hl.dsp.exec_cmd(browser))                          -- (Zen Browser)
+hl.bind(mainMod .. " + F", hl.dsp.window.fullscreen())                        -- (fullscreen toggle)
+hl.bind(mainMod .. " + Q", hl.dsp.window.close())                             -- (close window)
+hl.bind(mainMod .. " + Tab", hl.dsp.exec_cmd("qs -c noctalia-shell --lock"))  -- (Noctalia lock screen)
 -- UNVERIFIED: could not confirm the session/logout-panel CLI flag --
 -- see KEYBINDS.md
-hl.bind(mainMod .. " + Escape", hl.dsp.exec_cmd("qs -c noctalia-shell --control-center"))
-hl.bind(mainMod .. " + V", hl.dsp.window.float({ action = "toggle" }))
+hl.bind(mainMod .. " + Escape", hl.dsp.exec_cmd("qs -c noctalia-shell --control-center")) -- (Noctalia control center)
+hl.bind(mainMod .. " + V", hl.dsp.window.float({ action = "toggle" }))        -- (toggle floating)
 
-hl.bind(mainMod .. " + Delete", hl.dsp.exec_cmd("grim ~/Pictures/$(date +%s).png"))
-hl.bind("Delete", hl.dsp.exec_cmd("grim -g \"$(slurp)\" ~/Pictures/$(date +%s).png"))
+hl.bind(mainMod .. " + Delete", hl.dsp.exec_cmd("grim ~/Pictures/$(date +%s).png"))       -- (grim, full screenshot)
+hl.bind("Delete", hl.dsp.exec_cmd("grim -g \"$(slurp)\" ~/Pictures/$(date +%s).png"))     -- (grim+slurp, region screenshot)
+
+-- Cheatsheet: all keybinds + app names, deployed by functions/10-assets.sh
+hl.bind(mainMod .. " + SHIFT + Slash", hl.dsp.exec_cmd("kitty -e less ~/.config/keybindings.txt")) -- (keybindings.txt cheatsheet)
 
 -- Workspaces
 for i = 1, 4 do

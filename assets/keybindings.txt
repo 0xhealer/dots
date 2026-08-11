@@ -1,0 +1,29 @@
+Keybinds -- Hyprland leg (Mod = Super)
+Source of truth is KEYBINDS.md in the repo root -- update that first.
+
+  Mod + T              Terminal (kitty)
+  Mod + Return          Terminal (kitty)
+  Mod + Shift + Return    Terminal (foot) -- VM testing only, remove later
+
+  Mod + D              App launcher (Noctalia)
+  Mod + Space           App launcher (Noctalia)
+  Mod + Shift + D        Secondary launcher (Vicinae)
+
+  Mod + M              Music (Spotify)
+  Mod + E              File manager (Thunar)
+  Mod + B              Browser (Zen)
+
+  Mod + F              Fullscreen toggle
+  Mod + Q              Close window
+  Mod + V              Toggle floating
+
+  Mod + Tab             Lock screen (Noctalia)
+  Mod + Escape          Control center (Noctalia)
+
+  Mod + Delete          Screenshot, full (grim)
+  Delete               Screenshot, region (grim + slurp)
+
+  Mod + 1..4            Switch workspace 1-4
+  Mod + Shift + 1..4      Move window to workspace 1-4
+
+  Mod + Shift + Slash     Show this cheatsheet

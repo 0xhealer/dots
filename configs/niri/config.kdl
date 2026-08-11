@@ -27,67 +27,65 @@ layout {
 }
 
 // Blur -- niri 26.04 (April 2026) added blur via the ext-background-effect
-// protocol. Apps/shells that support it natively (Noctalia, Vicinae, Foot,
-// Kitty, Ghostty, Quickshell per niri's own release notes) get it with NO
-// config needed here at all. For anything else, niri exposes manual blur
-// via window-rule/layer-rule blocks -- but I could not find a confirmed
-// KDL key name for it (this feature is ~4 months old at time of writing
-// and the wiki examples I found didn't show the exact syntax). The block
-// below is commented out because I will not ship a guessed key in a config
-// you're about to run -- check https://github.com/YaLTeR/niri/wiki (or
-// `niri msg` help) for the real key, likely something like `blur` inside
-// window-rule / layer-rule, then uncomment and fix:
-//
-// window-rule {
-//     match app-id=".*"
-//     // blur true  <- confirm real key name before uncommenting
-// }
+// protocol. Noctalia, Vicinae, Foot, Kitty, Ghostty, and Quickshell all
+// get it with NO config needed here at all, per niri's own release notes
+// -- that covers everything in this setup, nothing further to add.
 
 // NOTE: "qs" "-c" "noctalia-shell" is the v4 (Quickshell) launch command.
-// Noctalia v5 dropped Quickshell/Qt -- if the AUR package is v5 this is
-// wrong. Check `noctalia-shell --version` before trusting this.
+// Confirmed v4 from a running install (noctalia-shell-4.7.7).
+//
+// "vicinae" "server" MUST be running before "vicinae" "toggle" does
+// anything -- confirmed from Vicinae's own docs (docs.vicinae.com). This
+// is the actual reason the launcher wasn't opening: the bind called a
+// bare "vicinae" with no server running and no toggle arg.
 spawn-at-startup "qs" "-c" "noctalia-shell"
 spawn-sh-at-startup "wl-paste --watch cliphist store"
+spawn-at-startup "vicinae" "server"
 
+// Niri's built-in hotkey overlay (Mod+Shift+Slash) lists every bind
+// below along with its hotkey-overlay-title -- this IS the "keybindings
+// with app name" cheatsheet, no custom file needed on this leg. Every
+// bind below has a title now so the overlay is actually useful.
 hotkey-overlay {
     skip-at-startup
 }
 
 binds {
-    Mod+T { spawn "kitty"; }
-    Mod+Return { spawn "kitty"; }
+    Mod+Shift+Slash { show-hotkey-overlay; }
+
+    Mod+T hotkey-overlay-title="Terminal (kitty)" { spawn "kitty"; }
+    Mod+Return hotkey-overlay-title="Terminal (kitty)" { spawn "kitty"; }
     // TEMPORARY -- VM testing only, remove this bind (and foot from
     // packages/pacman.txt) once off the VM. kitty can fail to launch or
     // render under VMware's SVGA virtual GPU; foot works with much less
     // GPU capability.
-    Mod+Shift+Return { spawn "foot"; }
+    Mod+Shift+Return hotkey-overlay-title="Terminal (foot, VM testing only)" { spawn "foot"; }
 
     Mod+D hotkey-overlay-title="Noctalia launcher" { spawn "qs" "-c" "noctalia-shell" "--launcher"; }
     Mod+Space hotkey-overlay-title="Noctalia launcher" { spawn "qs" "-c" "noctalia-shell" "--launcher"; }
-    // Vicinae as a secondary launcher (Noctalia's is primary on Mod+D) --
-    // installed via packages/aur.txt but this invocation is a guess, not
-    // confirmed against Vicinae's actual CLI/usage docs.
-    Mod+Shift+D { spawn "vicinae"; }
-    Mod+M { spawn "spotify"; }
-    Mod+E { spawn "thunar"; }
-    Mod+B { spawn "zen-browser"; }
+    // Fixed: "vicinae" "toggle", not bare "vicinae" -- see the
+    // spawn-at-startup note above.
+    Mod+Shift+D hotkey-overlay-title="Vicinae (secondary launcher)" { spawn "vicinae" "toggle"; }
+    Mod+M hotkey-overlay-title="Spotify" { spawn "spotify"; }
+    Mod+E hotkey-overlay-title="File manager (Thunar)" { spawn "thunar"; }
+    Mod+B hotkey-overlay-title="Browser (Zen)" { spawn "zen-browser"; }
 
     // niri's own default binds Mod+F to maximize-column and
     // Mod+Shift+F to fullscreen-window. This overrides Mod+F to match
     // the Hyprland leg's binding in KEYBINDS.md.
-    Mod+F { fullscreen-window; }
+    Mod+F hotkey-overlay-title="Fullscreen toggle" { fullscreen-window; }
 
-    Mod+Q { close-window; }
-    Mod+Tab { spawn "qs" "-c" "noctalia-shell" "--lock"; }
+    Mod+Q hotkey-overlay-title="Close window" { close-window; }
+    Mod+Tab hotkey-overlay-title="Noctalia lock screen" { spawn "qs" "-c" "noctalia-shell" "--lock"; }
 
     // UNVERIFIED: could not confirm the session/logout-panel CLI flag
     // for Noctalia v4 -- check `qs -c noctalia-shell --help` first
-    Mod+Escape allow-inhibiting=false { spawn "qs" "-c" "noctalia-shell" "--control-center"; }
+    Mod+Escape allow-inhibiting=false hotkey-overlay-title="Noctalia control center" { spawn "qs" "-c" "noctalia-shell" "--control-center"; }
 
-    Mod+V { toggle-window-floating; }
+    Mod+V hotkey-overlay-title="Toggle floating" { toggle-window-floating; }
 
-    Print { screenshot; }
-    Alt+Print { screenshot-window; }
+    Print hotkey-overlay-title="Screenshot" { screenshot; }
+    Alt+Print hotkey-overlay-title="Screenshot (window)" { screenshot-window; }
 
     // Workspaces -- kept parallel to the Hyprland leg's 1-4
     Mod+1 { focus-workspace 1; }
@@ -99,5 +97,5 @@ binds {
     Mod+Ctrl+3 { move-column-to-workspace 3; }
     Mod+Ctrl+4 { move-column-to-workspace 4; }
 
-    Mod+Shift+E { quit; }
+    Mod+Shift+E hotkey-overlay-title="Quit niri" { quit; }
 }

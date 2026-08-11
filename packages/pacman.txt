@@ -14,6 +14,7 @@ cliphist
 wl-clipboard
 grim
 slurp
+fish
 # TEMPORARY -- VM testing only, remove when off the VM. kitty needs real
 # OpenGL 3.3+ which VMware's SVGA virtual GPU often can't provide
 # cleanly; foot is a lightweight Wayland terminal with much lower GPU
