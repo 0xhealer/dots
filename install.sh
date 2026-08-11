@@ -33,8 +33,16 @@ echo "This installer needs sudo for package installation -- enter your password 
 sudo -v
 
 sudo_keepalive() {
+    # set -e is inherited from install.sh into this backgrounded
+    # subshell. Without the "|| true", the FIRST transient failure of
+    # `sudo -n true` (a scheduling delay, cache lapsing by a second
+    # before the refresh lands) kills this loop permanently under
+    # errexit -- not just that iteration, the whole background process
+    # exits and every sudo call after that re-prompts from cold. This
+    # was the actual cause of repeated password prompts, not a timing
+    # gap in the refresh interval.
     while true; do
-        sudo -n true
+        sudo -n true 2>/dev/null || true
         sleep 60
     done
 }

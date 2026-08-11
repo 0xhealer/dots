@@ -1,7 +1,12 @@
 // Niri config -- CachyOS box. KDL format: https://kdl.dev
-// Bar/launcher/lock/session are ALL Noctalia -- no Waybar, no Vicinae.
+// Bar/launcher/lock/session are Noctalia (primary), Vicinae is a
+// secondary launcher added back per request -- no Waybar.
 // Keybinds mirror KEYBINDS.md -- update that table first, then this file.
 // Action names verified against niri-wm/niri's own default-config.kdl.
+//
+// TEMPORARY: this file has a VM-testing-only foot terminal bind
+// (Mod+Shift+Return). Search "TEMPORARY" in this file and remove that
+// bind, plus "foot" from packages/pacman.txt, once off the VM.
 
 input {
     keyboard {
@@ -50,7 +55,15 @@ hotkey-overlay {
 
 binds {
     Mod+T { spawn "kitty"; }
+    Mod+Return { spawn "kitty"; }
+    // TEMPORARY -- VM testing only, remove this bind (and foot from
+    // packages/pacman.txt) once off the VM. kitty can fail to launch or
+    // render under VMware's SVGA virtual GPU; foot works with much less
+    // GPU capability.
+    Mod+Shift+Return { spawn "foot"; }
+
     Mod+D hotkey-overlay-title="Noctalia launcher" { spawn "qs" "-c" "noctalia-shell" "--launcher"; }
+    Mod+Space hotkey-overlay-title="Noctalia launcher" { spawn "qs" "-c" "noctalia-shell" "--launcher"; }
     // Vicinae as a secondary launcher (Noctalia's is primary on Mod+D) --
     // installed via packages/aur.txt but this invocation is a guess, not
     // confirmed against Vicinae's actual CLI/usage docs.

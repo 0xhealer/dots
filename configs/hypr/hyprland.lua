@@ -2,6 +2,10 @@
 -- stable). The old hyprland.conf/hyprlang syntax is deprecated -- this
 -- replaces it rather than sitting on a format already being phased out.
 -- Keybinds mirror KEYBINDS.md -- update that table first, then this file.
+--
+-- TEMPORARY: this file has a VM-testing-only foot terminal bind
+-- (Mod+Shift+Return). Search "TEMPORARY" in this file and remove that
+-- bind, plus "foot" from packages/pacman.txt, once off the VM.
 
 ------------------
 ---- MONITORS ----
@@ -77,8 +81,16 @@ hl.layer_rule({
 local mainMod = "SUPER"
 
 hl.bind(mainMod .. " + T", hl.dsp.exec_cmd(terminal))
+hl.bind(mainMod .. " + Return", hl.dsp.exec_cmd(terminal))
+-- TEMPORARY -- VM testing only, remove this bind (and foot from
+-- packages/pacman.txt) once off the VM. kitty can fail to launch or
+-- render under VMware's SVGA virtual GPU; foot works with much less
+-- GPU capability.
+hl.bind(mainMod .. " + SHIFT + Return", hl.dsp.exec_cmd("foot"))
+
 hl.bind(mainMod .. " + D", hl.dsp.exec_cmd("qs -c noctalia-shell --launcher"))
--- Vicinae as a secondary launcher (Noctalia's is primary on Mod+D) --
+hl.bind(mainMod .. " + Space", hl.dsp.exec_cmd("qs -c noctalia-shell --launcher"))
+-- Vicinae as a secondary launcher (Noctalia's is primary on Mod+D/Mod+Space) --
 -- installed via packages/aur.txt but its keybind/CLI invocation here is
 -- a guess (`vicinae` with no args, assuming it opens its own window)
 -- not confirmed against actual usage docs.
@@ -95,7 +107,7 @@ hl.bind(mainMod .. " + Escape", hl.dsp.exec_cmd("qs -c noctalia-shell --control-
 hl.bind(mainMod .. " + V", hl.dsp.window.float({ action = "toggle" }))
 
 hl.bind(mainMod .. " + Delete", hl.dsp.exec_cmd("grim ~/Pictures/$(date +%s).png"))
-hl.bind(",Delete", hl.dsp.exec_cmd("grim -g \"$(slurp)\" ~/Pictures/$(date +%s).png"))
+hl.bind("Delete", hl.dsp.exec_cmd("grim -g \"$(slurp)\" ~/Pictures/$(date +%s).png"))
 
 -- Workspaces
 for i = 1, 4 do

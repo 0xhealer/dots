@@ -16,8 +16,9 @@ Mod key = Super on both compositors.
 
 | Action              | Hyprland (Lua)                                              | Niri                                                    | Notes |
 |---------------------|----------------------------------------------------------------|----------------------------------------------------------|-------|
-| Terminal             | `hl.bind(mainMod.." + T", hl.dsp.exec_cmd(terminal))`             | `Mod+T { spawn "kitty"; }`                                 | |
-| App launcher          | `hl.bind(mainMod.." + D", hl.dsp.exec_cmd("qs -c noctalia-shell --launcher"))` | `Mod+D { spawn "qs" "-c" "noctalia-shell" "--launcher"; }` | Confirmed CLI flag |
+| Terminal             | `Mod+T` and `Mod+Return`, both -> exec_cmd(terminal)              | `Mod+T` and `Mod+Return`, both -> spawn "kitty"             | Two keys, same action |
+| Terminal (VM testing)   | `Mod+Shift+Return` -> exec_cmd("foot")                            | `Mod+Shift+Return { spawn "foot"; }`                         | TEMPORARY -- remove this bind + foot from pacman.txt once off the VM |
+| App launcher          | `Mod+D` and `Mod+Space`, both -> exec_cmd("qs -c noctalia-shell --launcher") | `Mod+D` and `Mod+Space`, both -> same spawn        | Confirmed CLI flag |
 | Secondary launcher      | `hl.bind(mainMod.." + SHIFT + D", hl.dsp.exec_cmd("vicinae"))`     | `Mod+Shift+D { spawn "vicinae"; }`                          | UNVERIFIED invocation -- guessed, not checked against Vicinae's own docs |
 | Music (Spotify)         | `hl.bind(mainMod.." + M", hl.dsp.exec_cmd("spotify"))`             | `Mod+M { spawn "spotify"; }`                                | |
 | File manager          | `hl.bind(mainMod.." + E", hl.dsp.exec_cmd(fileManager))`           | `Mod+E { spawn "thunar"; }`                                | |
