@@ -1,0 +1,24 @@
+// Rofi config -- CachyOS box, third launcher (Mod+Shift+Space).
+// Colors come from Noctalia's matugen-compatible wallpaper theming via
+// functions/14-matugen-templates.sh -- NOT a static palette, changes
+// with the wallpaper same as kitty/gtk/qt do.
+//
+// Import path is the ACTUAL output_path from
+// configs/noctalia/user-templates.toml, not rofi's own suggested
+// default (~/.config/rofi/colors.rasi) -- we deliberately keep
+// generated files under Noctalia's own templates/colors/ directory
+// rather than scattering matugen output across every app's own config
+// dir, so use the absolute path here to match.
+@import "~/.config/noctalia/templates/colors/rofi.rasi"
+
+configuration {
+    modi: "drun,run,window";
+    show-icons: true;
+    font: "JetBrainsMono Nerd Font 11";
+}
+
+window {
+    width: 30%;
+    border: 2px;
+    border-radius: 8px;
+}

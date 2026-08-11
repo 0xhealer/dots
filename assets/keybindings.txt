@@ -8,10 +8,11 @@ Source of truth is KEYBINDS.md in the repo root -- update that first.
   Mod + D              App launcher (Noctalia)
   Mod + Space           App launcher (Noctalia)
   Mod + Shift + D        Secondary launcher (Vicinae)
+  Mod + Shift + Space     Third launcher (Rofi)
 
-  Mod + M              Music (Spotify)
+  Mod + M              Music (Spotify -- manual install)
   Mod + E              File manager (Thunar)
-  Mod + B              Browser (Zen)
+  Mod + B              Browser (Helium)
 
   Mod + F              Fullscreen toggle
   Mod + Q              Close window

@@ -19,9 +19,24 @@
       { "id": "gtk4", "active": true },
       { "id": "qt", "active": true }
     ],
-    "enableUserTheming": false
+    "enableUserTheming": true
   },
   "bar": {
-    "position": "top"
+    "_comment": "backgroundOpacity/capsuleOpacity default to 1 (fully opaque) per Noctalia's own settings-default.json -- this was the actual missing piece for blur/transparency, not the compositor-side layer_rule which was already correct. Field names and the 0.5 example value confirmed from a real user's settings.json pasted in noctalia-shell issue #1864.",
+    "position": "top",
+    "backgroundOpacity": 0.85,
+    "capsuleOpacity": 0.85
+  },
+  "dock": {
+    "backgroundOpacity": 0.85
+  },
+  "notifications": {
+    "backgroundOpacity": 0.9
+  },
+  "osd": {
+    "backgroundOpacity": 0.9
+  },
+  "ui": {
+    "panelBackgroundOpacity": 0.85
   }
 }

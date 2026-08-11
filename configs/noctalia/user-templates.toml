@@ -1,0 +1,19 @@
+# Noctalia user-templates manifest. Path/structure confirmed from a real
+# noctalia-shell GitHub issue (#2468) showing this exact convention in
+# use: input files under ~/.config/noctalia/templates/, rendered output
+# under ~/.config/noctalia/templates/colors/. Deployed to
+# ~/.config/noctalia/user-templates.toml by functions/14-matugen-templates.sh.
+#
+# Covers the two apps Noctalia's own built-in template registry does
+# NOT include (confirmed list: kitty, niri, gtk3, gtk4, qt, plus things
+# like Fuzzel/Pywalfox -- no Rofi, no Spicetify).
+
+[templates.rofi]
+input_path = "~/.config/noctalia/templates/rofi.rasi"
+output_path = "~/.config/noctalia/templates/colors/rofi.rasi"
+
+[templates.spotify]
+input_path = "~/.config/noctalia/templates/spicetify.ini"
+output_path = "~/.config/spicetify/Themes/Sleek/color.ini"
+# Confirmed from InioX/matugen-themes' own Spicetify Sleek instructions.
+post_hook = "pgrep -x spicetify > /dev/null || spicetify apply -n"

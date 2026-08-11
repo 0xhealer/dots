@@ -22,7 +22,7 @@ hl.monitor({
 ---------------------
 local terminal = "kitty"
 local fileManager = "thunar"
-local browser = "zen-browser"
+local browser = "helium-browser"
 
 -------------------
 ---- AUTOSTART ----
@@ -66,15 +66,16 @@ hl.config({
 })
 
 -- Blur/transparency for Noctalia's own surfaces (bar, panels, dock,
--- notifications). The blur/ignore_alpha field names here are now
--- CROSS-CONFIRMED -- Vicinae's own official Hyprland quickstart docs
--- use this exact same layerrule shape (name/blur/ignore_alpha/
--- match:namespace) for its own blur setup, which is independent
--- confirmation of the pattern I was only guessing at before.
+-- notifications). Field names now confirmed twice over: Vicinae's
+-- official Hyprland quickstart docs use this same shape, AND a real
+-- working Hyprland rice repo (R7rainz/dotfiles) uses this exact rule
+-- for Noctalia specifically, including blur_popups which I'd missed,
+-- and the trailing $ anchor on the namespace pattern.
 hl.layer_rule({
     name = "noctalia-blur",
-    match = { namespace = "noctalia-background-.*" },
+    match = { namespace = "noctalia-background-.*$" },
     blur = true,
+    blur_popups = true,
     ignore_alpha = 0.5,
 })
 
@@ -106,9 +107,10 @@ hl.bind(mainMod .. " + D", hl.dsp.exec_cmd("qs -c noctalia-shell --launcher")) -
 hl.bind(mainMod .. " + Space", hl.dsp.exec_cmd("qs -c noctalia-shell --launcher")) -- (Noctalia launcher)
 -- Fixed: "vicinae toggle", not bare "vicinae" -- see AUTOSTART note above.
 hl.bind(mainMod .. " + SHIFT + D", hl.dsp.exec_cmd("vicinae toggle"))          -- (Vicinae, secondary launcher)
-hl.bind(mainMod .. " + M", hl.dsp.exec_cmd("spotify"))                        -- (Spotify)
+hl.bind(mainMod .. " + SHIFT + Space", hl.dsp.exec_cmd("rofi -show drun"))     -- (Rofi, third launcher)
+hl.bind(mainMod .. " + M", hl.dsp.exec_cmd("spotify"))                        -- (Spotify -- manual install, skipped in aur.txt)
 hl.bind(mainMod .. " + E", hl.dsp.exec_cmd(fileManager))                      -- (Thunar)
-hl.bind(mainMod .. " + B", hl.dsp.exec_cmd(browser))                          -- (Zen Browser)
+hl.bind(mainMod .. " + B", hl.dsp.exec_cmd(browser))                          -- (Helium Browser)
 hl.bind(mainMod .. " + F", hl.dsp.window.fullscreen())                        -- (fullscreen toggle)
 hl.bind(mainMod .. " + Q", hl.dsp.window.close())                             -- (close window)
 hl.bind(mainMod .. " + Tab", hl.dsp.exec_cmd("qs -c noctalia-shell --lock"))  -- (Noctalia lock screen)

@@ -29,7 +29,16 @@ layout {
 // Blur -- niri 26.04 (April 2026) added blur via the ext-background-effect
 // protocol. Noctalia, Vicinae, Foot, Kitty, Ghostty, and Quickshell all
 // get it with NO config needed here at all, per niri's own release notes
-// -- that covers everything in this setup, nothing further to add.
+// -- that covers everything in this setup, nothing further to add. Now
+// doubly confirmed: Noctalia's own v5 FAQ says niri "publishes blur
+// regions even for transparent bars" automatically, and covers how to
+// DISABLE it if unwanted -- confirming it's on by default, matching
+// what's documented here.
+//
+// The actual missing piece for visible blur wasn't compositor config on
+// either leg -- it was Noctalia's own backgroundOpacity defaulting to 1
+// (fully opaque), so there was nothing for the compositor to blur
+// through. Fixed in configs/noctalia/settings.json.
 
 // NOTE: "qs" "-c" "noctalia-shell" is the v4 (Quickshell) launch command.
 // Confirmed v4 from a running install (noctalia-shell-4.7.7).
@@ -66,9 +75,10 @@ binds {
     // Fixed: "vicinae" "toggle", not bare "vicinae" -- see the
     // spawn-at-startup note above.
     Mod+Shift+D hotkey-overlay-title="Vicinae (secondary launcher)" { spawn "vicinae" "toggle"; }
+    Mod+Shift+Space hotkey-overlay-title="Rofi (third launcher)" { spawn "rofi" "-show" "drun"; }
     Mod+M hotkey-overlay-title="Spotify" { spawn "spotify"; }
     Mod+E hotkey-overlay-title="File manager (Thunar)" { spawn "thunar"; }
-    Mod+B hotkey-overlay-title="Browser (Zen)" { spawn "zen-browser"; }
+    Mod+B hotkey-overlay-title="Browser (Helium)" { spawn "helium-browser"; }
 
     // niri's own default binds Mod+F to maximize-column and
     // Mod+Shift+F to fullscreen-window. This overrides Mod+F to match

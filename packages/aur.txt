@@ -5,4 +5,51 @@ noctalia-shell
 # (comments on the package page as of mid-2026) -- if it fails, try
 # plain "vicinae" (builds from source, slower but more likely to work)
 vicinae-bin
-spotify
+# helium-browser-bin (prebuilt) -- switched from Zen per request.
+# Package: helium-browser-bin, binary: helium-browser (confirmed from
+# the AUR package's own PKGBUILD install line). NOT plain
+# "helium-browser": that's the source-build variant with its own
+# reported build issues. helium-browser-bin has had occasional
+# checksum breakage too (less often than the source build) -- if it
+# fails, the installer's per-package resilience means everything else
+# still installs; retry this one on its own with `yay -S helium-browser-bin`.
+helium-browser-bin
+# spotify skipped -- installing manually later. Its AUR PKGBUILD pins a
+# checksum against Spotify's own .deb that breaks periodically when
+# Spotify rotates builds; the Mod+M keybind will work once you've
+# installed it some other way.
+
+# --- Cross-referenced from packages/winget.txt ---
+# brave-bin -- Brave.Brave. Separate from the Helium browser bind
+# (Mod+B) -- installed but not wired to a keybind, launch it by name or
+# through a launcher if you want it available alongside Helium.
+brave-bin
+# obsidian -- Obsidian.Obsidian
+obsidian
+# visual-studio-code-insiders-bin -- confirmed real package name
+# (auto-updates daily per its own AUR page), not the stable "code"
+# package -- Microsoft.VisualStudioCode.Insiders specifically asked for
+# Insiders on Windows.
+visual-studio-code-insiders-bin
+# foxitreader skipped -- replaced with Zathura + Okular (pacman.txt)
+# per request, avoiding the libxml2.so.2 breakage risk flagged earlier.
+# proton-mail-bin -- Proton.ProtonMail. Proton shipped an official Linux
+# desktop app in 2026 (previously browser/Bridge-only) -- this AUR
+# package wraps that official .deb release, confirmed actively
+# maintained from real version-bump comments on the package page.
+proton-mail-bin
+
+# --- Explicitly skipped, not just missed ---
+# Google.GoogleDrive: no official Linux client exists. Standard Linux
+# answer is rclone (CLI, mount via rclone mount) but that needs
+# interactive OAuth setup this installer can't do unattended -- not
+# added, set up manually if wanted.
+# Microsoft.PowerShell, Microsoft.WindowsTerminal, Microsoft.PowerToys,
+# Microsoft.VCRedist.2015+.x64, RevoUninstaller.RevoUninstaller: Windows
+# platform tools/runtimes with no Linux equivalent need (fish+starship
+# and kitty already cover the shell/terminal role; pacman -Rns handles
+# uninstall cleanup natively, no separate tool needed).
+# Zen-Team.Zen-Browser: explicitly replaced by Helium earlier in this
+# setup -- not reintroduced.
+# Oracle.VirtualBox, Hashicorp.Vagrant: commented out in winget.txt
+# itself, so left out here too.

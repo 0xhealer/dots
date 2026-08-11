@@ -15,8 +15,60 @@ wl-clipboard
 grim
 slurp
 fish
+# Rofi -- third launcher option alongside Noctalia (primary) and
+# Vicinae (secondary), bound Mod+Shift+Space. rofi-wayland since both
+# compositors here are Wayland-native, not the X11 rofi package.
+rofi-wayland
 # TEMPORARY -- VM testing only, remove when off the VM. kitty needs real
 # OpenGL 3.3+ which VMware's SVGA virtual GPU often can't provide
 # cleanly; foot is a lightweight Wayland terminal with much lower GPU
 # requirements, useful as a working fallback while testing in the VM.
 foot
+
+# --- Cross-referenced from packages/winget.txt and packages/scoop.txt ---
+# CLI tools (scoop.txt) -- direct pacman equivalents, all official repo
+fzf
+ripgrep
+python
+bat
+eza
+zoxide
+go
+github-cli
+cmake
+wget
+curl
+gcc
+gdb
+android-tools
+lazygit
+jq
+rustup
+
+# GUI apps (winget.txt) -- available in official repos
+vlc
+handbrake
+# PDF readers -- replacing Foxit (moved to aur.txt's skip note): zathura
+# (keyboard-driven, vim-like, needs a backend plugin to actually render
+# PDFs) + okular (full-featured, KDE). zathura-pdf-mupdf is the backend;
+# without it zathura installs but can't open PDFs.
+zathura
+zathura-pdf-mupdf
+okular
+
+# Docker + Tailscale -- winget.txt has Docker.DockerDesktop and
+# Tailscale.Tailscale. Docker Desktop itself is a Windows/Mac GUI
+# wrapper with no real Linux equivalent -- the actual Linux answer is
+# plain Docker Engine + Compose, which also matches what this box was
+# already meant to run (media server via Docker, remote access via
+# Tailscale -- see areas notes). functions/16-services.sh enables both.
+docker
+docker-compose
+tailscale
+
+# JetBrainsMono Nerd Font -- referenced by configs/kitty/kitty.conf and
+# configs/rofi/config.rasi but was never actually being installed
+# anywhere. Not in winget.txt's font set either (that has Anonymous
+# Pro/FiraCode/Hack NF only, see functions/15-fonts.sh for those) --
+# this was a real gap, not a cross-platform decision.
+ttf-jetbrains-mono-nerd
