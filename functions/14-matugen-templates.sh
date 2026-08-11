@@ -1,20 +1,18 @@
 #!/usr/bin/env bash
 # functions/14-matugen-templates.sh -- module name: "matugen-templates"
 #
-# UNVERIFIED SINCE THE v5 UPGRADE: this was built and confirmed against
-# Noctalia v4's user-templates mechanism (enableUserTheming in
-# settings.json, ~/.config/noctalia/templates/ path convention). v5 uses
-# settings.toml with an unconfirmed schema -- whether this same
-# mechanism exists at all in v5, under what config keys, is unknown.
-# Deploys the same files regardless; verify they actually do anything
-# post-upgrade rather than assuming.
+# NOW CONFIRMED for v5: user templates are declared directly in
+# config.toml under [theme.templates.user.<name>] (confirmed from
+# Noctalia's official example.toml) -- functions/09-noctalia.sh already
+# deploys that. This step only fetches the actual template FILE
+# CONTENT that config.toml's input_path entries point at.
 #
 # Noctalia's own theming engine is matugen-compatible internally
-# (confirmed: its codebase literally has a "MatugenTemplates" module and
-# its TemplateRenderer is described as using "Matugen-compatible
-# syntax"). Rofi and Spicetify are not in its built-in template
-# registry -- this fills that gap via user-templates rather than a
-# separate standalone matugen process.
+# (confirmed: real commits like "Matugen: move templates a folder up"
+# and a "MatugenTemplates" module in its own codebase). Rofi and
+# Spicetify aren't in its built-in template registry -- this fills that
+# gap via user templates rather than a separate standalone matugen
+# process.
 set -euo pipefail
 
 write_module_header "Fetching real matugen templates (rofi, spicetify)"
@@ -28,7 +26,8 @@ git clone --depth 1 https://github.com/InioX/matugen-themes.git "${TMP_DIR}/matu
 ROFI_TEMPLATE="$(find "${TMP_DIR}/matugen-themes/templates" -iname '*rofi*' -type f | head -n1)"
 SPOTIFY_TEMPLATE="$(find "${TMP_DIR}/matugen-themes/templates" -iname '*spicetify*' -o -iname '*sleek*' -type f 2>/dev/null | head -n1)"
 
-mkdir -p "$HOME/.config/noctalia/templates/colors"
+# Paths match config.toml's [theme.templates.user.*].input_path entries exactly.
+mkdir -p "$HOME/.config/noctalia/templates"
 
 if [ -n "$ROFI_TEMPLATE" ]; then
     cp "$ROFI_TEMPLATE" "$HOME/.config/noctalia/templates/rofi.rasi"
@@ -46,12 +45,7 @@ fi
 
 rm -rf "$TMP_DIR"
 
-write_module_header "Deploying Noctalia user-templates manifest"
-copy_dotfile "${DOTFILES_ROOT}/configs/noctalia/user-templates.toml" "$HOME/.config/noctalia/user-templates.toml"
-
 write_module_header "Deploying Rofi config with color import"
 copy_dotfile "${DOTFILES_ROOT}/configs/rofi/config.rasi" "$HOME/.config/rofi/config.rasi"
 
-echo "!! UNVERIFIED post-v5-upgrade: confirm ~/.config/noctalia/settings.toml actually has whatever v5's equivalent of enableUserTheming is, and that v5 even reads user-templates.toml from this same path -- both were only confirmed for v4."
-echo "!! Spicetify itself is not installed by this step -- it needs Spotify present first (skipped per request, install manually), and the Spicetify CLI on top of that."
-
+echo "!! Spicetify itself is not installed by this step, only its CLI package (spicetify-cli, see pacman.txt) -- it still needs Spotify present first (skipped per request, install manually) before the theme actually applies to anything."

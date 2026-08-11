@@ -9,12 +9,13 @@ sudo pacman -S --needed --noconfirm qt6-svg qt6-declarative unzip
 
 write_module_header "Downloading Catppuccin SDDM theme (Mocha, Mauve accent)"
 TMP_DIR="$(mktemp -d)"
-# Confirmed from catppuccin/sddm's own README: release assets are named
-# per flavor+accent (e.g. catppuccin-mocha-mauve.zip), not just per
-# flavor -- the earlier "catppuccin-mocha.zip" guess 404'd because of
-# this.
+# Confirmed against the actual release asset list on GitHub (catppuccin/sddm
+# releases page) -- the real filename pattern is
+# catppuccin-<flavor>-<accent>-sddm.zip (e.g. catppuccin-frappe-mauve-sddm.zip
+# was visible in the v1.1.2 release). The previous URL
+# (catppuccin-mocha-mauve.zip) was missing the "-sddm" segment, hence the 404.
 curl -fsSL -o "${TMP_DIR}/catppuccin-sddm.zip" \
-    "https://github.com/catppuccin/sddm/releases/latest/download/catppuccin-mocha-mauve.zip" \
+    "https://github.com/catppuccin/sddm/releases/latest/download/catppuccin-mocha-mauve-sddm.zip" \
     || { echo "!! Download failed -- check https://github.com/catppuccin/sddm/releases for the exact current asset name and adjust the URL above if this 404s" >&2; exit 1; }
 
 sudo mkdir -p /usr/share/sddm/themes

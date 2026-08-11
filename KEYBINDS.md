@@ -33,22 +33,39 @@ Mod key = Super on both compositors.
 | Screenshot (full)         | `grim` via exec_cmd                                             | `Print { screenshot; }`                                     | Different mechanism per leg |
 
 ## Noctalia: upgraded v4 -> v5 (5.0.0_beta.7)
-- v4's opacity/blur troubleshooting (backgroundOpacity defaulting to 1,
-  confirmed and fixed via settings.json) is now MOOT -- v5 uses a
-  different config file entirely (settings.toml, not settings.json) and
-  I do not have confirmed opacity/blur key names for v5's fast-moving
-  beta. Rather than guess and repeat the v4 troubleshooting loop,
-  configs/noctalia/settings.toml deliberately ONLY contains fields I
-  could confirm from a real source (theme, wallpaper). Set
-  opacity/blur/anything else via Noctalia's own Settings GUI first --
-  it writes the correct schema for whatever your exact build expects --
-  then run `functions/18-pull-noctalia-settings.sh` (module name
-  "pull-noctalia-settings", NOT part of a normal install.sh run since
-  it's interactive) to bring those GUI-made changes back into this repo.
+- v4's opacity/blur troubleshooting (backgroundOpacity in settings.json)
+  is moot -- v5 uses `~/.config/noctalia/config.toml`, a completely
+  different file, name, and schema. (v5 also has a settings.toml, but
+  that's a separate GUI-managed override file at
+  ~/.local/state/noctalia/ containing only deltas from config.toml --
+  not something this repo writes to. See
+  functions/18-pull-noctalia-settings.sh, which reads that file and
+  shows you the diff rather than overwriting anything.)
+- Full opacity/blur/transparency config now confirmed from Noctalia's
+  own official example.toml (not guessed): `shell.panel.transparency_mode
+  = "glass"` is the actual frosted-glass toggle for panels;
+  `bar.main.background_opacity`, `notification.background_opacity`,
+  `osd.background_opacity`, `lockscreen.blur_intensity`,
+  `backdrop.blur_intensity` cover the rest. All set in
+  configs/noctalia/config.toml.
+- Same bug class as v4's empty `activeTemplates`: v5's
+  `theme.templates.builtin_ids` also defaults to an empty list --
+  wallpaper-driven colors get generated but applied to nothing until
+  apps are listed. Populated with kitty/niri/gtk3/gtk4/qt as a best
+  guess carried over from v4's confirmed ids -- UNVERIFIED that v5 uses
+  the same spelling, run `noctalia theme --list-templates` to confirm.
+- Rofi/Spicetify user templates now declared directly in config.toml
+  under `[theme.templates.user.<name>]` -- this is v5's real, confirmed
+  schema, NOT a separate user-templates.toml file (that was a
+  carried-over v4 assumption that turned out wrong).
 - v5 dropped Quickshell/Qt entirely -- it's a native C++/OpenGL ES
   binary. Launch command changed from `qs -c noctalia-shell` to
-  `noctalia --daemon`; all IPC commands changed from CLI flags
-  (--launcher, --lock, --control-center) to `noctalia msg <command>`.
+  `noctalia` (no flag -- an earlier version of this file had
+  `noctalia --daemon` for Hyprland based on a generic doc line; the
+  Hyprland-specific docs AND a real working Hyprland+Noctalia-v5+CachyOS
+  dotfiles repo both confirm no flag is correct there). All IPC
+  commands changed from CLI flags (--launcher, --lock, --control-center)
+  to `noctalia msg <command>`.
   Confirmed from official docs AND cross-checked against a real
   first-hand blog post showing actual working niri config lines.
 - Package changed from AUR `noctalia-shell` to `noctalia` -- and

@@ -10,12 +10,31 @@
 ------------------
 ---- MONITORS ----
 ------------------
+-- scale = 1 explicit, NOT "auto" -- real precedent from the NixOS box:
+-- "auto" picked a bad HiDPI factor there too and inflated/misrendered
+-- everything across multiple apps simultaneously, fixed by forcing
+-- scale=1. Same failure class as the scaling glitches seen here
+-- (torn/misaligned rendering in a browser window) -- worth trying the
+-- same fix that already worked once on this same VM-testing pattern.
 hl.monitor({
     output = "",
     mode = "preferred",
     position = "auto",
-    scale = "auto",
+    scale = 1,
 })
+
+-------------------------------
+---- TEMPORARY: VM RENDERING ----
+-------------------------------
+-- Real precedent, not a guess -- these are the exact env vars that
+-- previously fixed Hyprland + kitty OpenGL failures on this same class
+-- of hardware (VMware SVGA virtual GPU) on the NixOS box. kitty needs
+-- real OpenGL 3.3+; software rendering sidesteps the SVGA driver
+-- entirely instead of fighting it. Remove this whole block (and the
+-- other TEMPORARY-tagged bits in this file) once off the VM.
+hl.env("WLR_RENDERER", "pixman")
+hl.env("WLR_NO_HARDWARE_CURSORS", "1")
+hl.env("WLR_RENDERER_ALLOW_SOFTWARE", "1")
 
 ---------------------
 ---- MY PROGRAMS ----
@@ -27,15 +46,19 @@ local browser = "helium-browser"
 -------------------
 ---- AUTOSTART ----
 -------------------
--- v5: "noctalia --daemon" replaces "qs -c noctalia-shell" entirely --
--- v5 is a native binary, no Quickshell/Qt runtime involved at all.
--- Confirmed from Noctalia's own docs ("supports a --daemon flag for
--- compositors that expect the startup process to fork and return").
+-- v5: "noctalia" replaces "qs -c noctalia-shell" entirely -- v5 is a
+-- native binary, no Quickshell/Qt runtime involved at all. Confirmed
+-- from Noctalia's own official Hyprland-specific v5 docs AND a real
+-- published Hyprland+Noctalia-v5+CachyOS dotfiles repo (shifaz-dev) --
+-- NO --daemon flag for Hyprland specifically. I'd added --daemon based
+-- on a generic doc line ("some compositors need this") without
+-- checking the Hyprland-specific page, which shows it without the
+-- flag -- that was almost certainly why it wasn't starting at all.
 --
 -- "vicinae server" MUST be running before "vicinae toggle" does
 -- anything -- confirmed from Vicinae's own docs (docs.vicinae.com).
 hl.on("hyprland.start", function()
-    hl.exec_cmd("noctalia --daemon")
+    hl.exec_cmd("noctalia")
     hl.exec_cmd("wl-paste --watch cliphist store")
     hl.exec_cmd("vicinae server")
 end)
@@ -66,16 +89,16 @@ hl.config({
 })
 
 -- Blur/transparency for Noctalia's own surfaces (bar, panels, dock,
--- notifications). UNVERIFIED FOR v5: this namespace pattern
--- ("noctalia-background-.*$") was confirmed for v4's Quickshell-based
--- layer-shell surfaces. v5 is a from-scratch native renderer -- I have
--- no confirmation its layer-shell surface namespaces are named the
--- same way. Left as-is since it's a reasonable starting guess, but
--- verify with `hyprctl layers` while Noctalia v5 is running and adjust
--- the namespace match if it doesn't actually target anything.
+-- notifications, OSD). NOW CONFIRMED for v5 specifically -- the same
+-- real Hyprland+Noctalia-v5+CachyOS dotfiles repo that fixed the
+-- autostart bug also gives the actual v5 layer-shell namespace
+-- pattern, which is NOT what I'd carried over from v4
+-- ("noctalia-background-.*$" was a v4 guess that never got confirmed
+-- for v5 -- this replaces it with a real one).
 hl.layer_rule({
-    name = "noctalia-blur",
-    match = { namespace = "noctalia-background-.*$" },
+    name = "noctalia",
+    match = { namespace = "^noctalia-(bar-.+|notification|dock|panel|attached-panel|osd)$" },
+    no_anim = true,
     blur = true,
     blur_popups = true,
     ignore_alpha = 0.5,
@@ -86,6 +109,17 @@ hl.layer_rule({
     match = { namespace = "vicinae" },
     blur = true,
     ignore_alpha = 0,
+})
+
+-- Noctalia's Settings window is a regular window, not a layer-shell
+-- surface -- without this it tiles like any other window instead of
+-- floating as a proper settings dialog. Window class confirmed from
+-- the same real reference as the layer_rule above.
+hl.window_rule({
+    name = "noctalia-settings-float",
+    match = { class = "dev.noctalia.Noctalia" },
+    float = true,
+    size = { 1080, 920 },
 })
 
 ---------------------

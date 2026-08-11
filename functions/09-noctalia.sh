@@ -1,9 +1,9 @@
 #!/usr/bin/env bash
 # functions/09-noctalia.sh -- module name: "noctalia"
-# Installs Noctalia v5 (upgraded from v4 per request) and deploys the
-# confirmed-safe subset of settings.toml. v5 is 5.0.0_beta.7 -- genuinely
-# beta, and only moved from AUR into Arch's own extra-testing repo about
-# a day before this was written.
+# Installs Noctalia v5 and deploys config.toml -- CORRECT filename,
+# confirmed from the official example.toml's own instructions ("Copy to
+# ~/.config/noctalia/config.toml"). Earlier settings.toml/settings.json
+# names were both wrong for v5.
 set -euo pipefail
 
 write_module_header "Installing Noctalia v5"
@@ -18,16 +18,15 @@ else
     exit 1
 fi
 
-write_module_header "Deploying Noctalia settings (confirmed subset only)"
+write_module_header "Deploying Noctalia config"
 mkdir -p "$HOME/.config/noctalia"
-copy_dotfile "${DOTFILES_ROOT}/configs/noctalia/settings.toml" "$HOME/.config/noctalia/settings.toml"
+copy_dotfile "${DOTFILES_ROOT}/configs/noctalia/config.toml" "$HOME/.config/noctalia/config.toml"
 
 echo ""
-echo "!! settings.toml only sets fields I could confirm from real sources"
-echo "!! (theme, wallpaper). Opacity/blur/template-activation keys for"
-echo "!! v5 beta.7 specifically are NOT in this file -- guessing TOML"
-echo "!! schema on fast-moving beta software is exactly what caused the"
-echo "!! v4 troubleshooting loop. Instead:"
-echo "!!   1. Open Noctalia's Settings GUI, set opacity/blur there directly"
-echo "!!   2. Run functions/18-pull-noctalia-settings.sh to copy the"
-echo "!!      live file back into this repo so it's captured for next time"
+echo "!! theme.templates.builtin_ids (kitty, niri, gtk3, gtk4, qt) is a"
+echo "!! best guess carried over from v4's confirmed ids -- run"
+echo "!! 'noctalia theme --list-templates' on the live system to confirm"
+echo "!! v5 uses the same spelling before trusting it fully."
+echo "!! GUI-made changes go to ~/.local/state/noctalia/settings.toml,"
+echo "!! a DIFFERENT file -- functions/18-pull-noctalia-settings.sh reads"
+echo "!! from there, not from this config.toml."

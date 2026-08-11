@@ -39,7 +39,7 @@ layout {
 // either leg -- it was Noctalia's own backgroundOpacity defaulting to 1
 // (fully opaque), confirmed and fixed for v4. Upgrading to v5 now --
 // its opacity/blur equivalents aren't guessed here, see
-// configs/noctalia/settings.toml's comments.
+// configs/noctalia/config.toml's comments.
 
 // v5: "noctalia" "--daemon" replaces "qs" "-c" "noctalia-shell" entirely
 // -- v5 is a native binary, no Quickshell/Qt runtime at all. Confirmed

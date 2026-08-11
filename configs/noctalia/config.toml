@@ -1,0 +1,110 @@
+# Noctalia v5 config -- CORRECT FILENAME AND LOCATION, confirmed from the
+# official example.toml (noctalia-dev/noctalia repo): "Copy to
+# ~/.config/noctalia/config.toml". The earlier settings.toml/settings.json
+# filenames used throughout this migration were both wrong for v5 -- this
+# replaces them. GUI-made changes live at a DIFFERENT path entirely
+# (~/.local/state/noctalia/settings.toml) and only ever contain deltas
+# from this file -- see functions/18-pull-noctalia-settings.sh, updated
+# to target that path instead of this one.
+#
+# Every key below is copied from the official example.toml (confirmed
+# real, not guessed) with only the specific values changed that this
+# section's comment calls out. Full [bar.main] block included even
+# though only background_opacity changed, since a sparse table might
+# blank out the widget layout instead of merging against defaults --
+# not worth the risk of guessing which behavior applies here.
+
+[shell.panel]
+# THE actual blur/frosted-glass toggle -- confirmed real key, not
+# something I'd found in any of the earlier troubleshooting. "glass"
+# is explicitly one of three valid values (solid | soft | glass).
+transparency_mode = "glass"
+borders = true
+shadow = true
+launcher_placement = "centered"
+clipboard_placement = "centered"
+control_center_placement = "attached"
+wallpaper_placement = "attached"
+session_placement = "attached"
+
+[wallpaper]
+enabled = true
+directory = "~/Pictures/Wallpapers"
+transition_on_startup = true
+
+[theme]
+mode = "dark"
+source = "wallpaper"
+wallpaper_scheme = "m3-content"
+
+[theme.templates]
+enable_builtin_templates = true
+# UNVERIFIED IDs: these are v4's confirmed template ids carried over as
+# a best guess -- v5's actual ids need `noctalia theme --list-templates`
+# run on the live system to confirm spelling/casing hasn't changed.
+# This is the same bug class as v4's empty activeTemplates -- leaving
+# this list empty means NOTHING gets themed regardless of source=wallpaper.
+builtin_ids = ["kitty", "niri", "gtk3", "gtk4", "qt"]
+enable_community_templates = true
+
+# Rofi and Spicetify aren't in the builtin registry -- user templates
+# now declared directly here (v5's real schema), NOT in a separate
+# user-templates.toml file like the old v4-era approach. Template files
+# themselves still pulled from InioX/matugen-themes at install time --
+# see functions/14-matugen-templates.sh.
+[theme.templates.user.rofi]
+input_path = "~/.config/noctalia/templates/rofi.rasi"
+output_path = "~/.config/rofi/colors.rasi"
+
+[theme.templates.user.spicetify]
+input_path = "~/.config/noctalia/templates/spicetify.ini"
+output_path = "~/.config/spicetify/Themes/Sleek/color.ini"
+post_hook = "pgrep -x spicetify > /dev/null || spicetify apply -n"
+
+[notification]
+enable_daemon = true
+show_app_name = true
+show_actions = true
+layer = "top"
+scale = 1.0
+background_opacity = 0.9
+offset_x = 20
+offset_y = 8
+
+[osd]
+position = "top_right"
+orientation = "horizontal"
+scale = 1.0
+background_opacity = 0.9
+offset_x = 20
+offset_y = 8
+
+[lockscreen]
+# blurred_desktop needs wlr-screencopy -- both niri and Hyprland support
+# this protocol, should work on either leg.
+blurred_desktop = true
+blur_intensity = 0.6
+tint_intensity = 0.3
+
+[backdrop]
+enabled = true
+blur_intensity = 0.5
+tint_intensity = 0.3
+
+[bar.main]
+position = "top"
+thickness = 34
+background_opacity = 0.85
+radius = 12
+margin_h = 180
+margin_v = 10
+padding = 14
+widget_spacing = 6
+scale = 1.0
+shadow = true
+auto_hide = false
+reserve_space = true
+capsule = false
+start = ["launcher", "wallpaper", "workspaces"]
+center = ["clock"]
+end = ["media", "tray", "notifications", "clipboard", "network", "bluetooth", "volume", "brightness", "battery", "control-center", "session"]

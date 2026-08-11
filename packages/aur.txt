@@ -42,6 +42,11 @@ visual-studio-code-insiders-bin
 # package wraps that official .deb release, confirmed actively
 # maintained from real version-bump comments on the package page.
 proton-mail-bin
+# spicetify-cli -- confirmed real AUR package. Themes Spotify once it's
+# installed (still deferred, install manually). The Sleek theme's
+# matugen color template is already wired in via config.toml's
+# [theme.templates.user.spicetify], see functions/14-matugen-templates.sh.
+spicetify-cli
 
 # --- Explicitly skipped, not just missed ---
 # Google.GoogleDrive: no official Linux client exists. Standard Linux

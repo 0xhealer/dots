@@ -4,30 +4,34 @@
 #
 # NOT part of a normal ./install.sh run -- this is a one-off, run
 # manually whenever you've changed Noctalia's settings through its own
-# GUI and want those changes captured back into the dotfiles repo.
+# GUI and want to consider bringing those changes into the repo.
 #
-# install.sh only ever copies repo -> live system (copy_dotfile). There
-# is no automatic reverse sync -- if you edit settings via the GUI and
-# never run this, the next `./install.sh noctalia` will silently
-# overwrite your live changes with whatever's still in the repo. This
-# script is the deliberate, explicit way to go the other direction.
+# IMPORTANT, and different from how this script worked before the v5
+# filename fix: the GUI does NOT write to config.toml. It writes to
+# ~/.local/state/noctalia/settings.toml, which contains ONLY the deltas
+# from config.toml (confirmed from Noctalia's own config-system docs --
+# if a GUI value matches what config.toml already says, the key gets
+# REMOVED from settings.toml rather than stored as a redundant
+# override). That means this file is a partial diff, not a full config
+# -- copying it wholesale over config.toml would delete every setting
+# the GUI didn't touch. This script shows you the file's contents
+# instead of blindly overwriting anything; you decide what to
+# hand-merge into config.toml.
 set -euo pipefail
 
-LIVE_FILE="$HOME/.config/noctalia/settings.toml"
-REPO_FILE="${DOTFILES_ROOT}/configs/noctalia/settings.toml"
+STATE_FILE="$HOME/.local/state/noctalia/settings.toml"
 
-if [ ! -f "$LIVE_FILE" ]; then
-    echo "No live settings.toml found at ${LIVE_FILE} -- nothing to pull" >&2
-    exit 1
+if [ ! -f "$STATE_FILE" ]; then
+    echo "No GUI-override file found at ${STATE_FILE} yet -- normal on a first install before Noctalia's been run/Settings opened, nothing to show"
+    exit 0
 fi
 
-write_module_header "Pulling live Noctalia settings into the repo"
-diff -u "$REPO_FILE" "$LIVE_FILE" || true
+write_module_header "GUI-made changes (deltas from config.toml)"
+cat "$STATE_FILE"
 echo ""
-read -rp "Copy the live file over the repo's version shown above? [y/N]: " confirm
-if [[ "$confirm" =~ ^[Yy]$ ]]; then
-    cp "$LIVE_FILE" "$REPO_FILE"
-    echo -e "\033[32m[SUCCESS] Repo file updated -- review with 'git diff', then commit and push yourself\033[0m"
-else
-    echo "Cancelled -- repo file left unchanged"
-fi
+echo "These are overrides ON TOP OF configs/noctalia/config.toml, not a"
+echo "full config. Manually copy whichever keys above you want to make"
+echo "permanent into configs/noctalia/config.toml, then re-run"
+echo "'./install.sh noctalia' to redeploy -- that keeps config.toml as"
+echo "the single readable source of truth instead of scattering settings"
+echo "across two files."
