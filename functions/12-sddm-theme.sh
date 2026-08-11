@@ -7,14 +7,15 @@ set -euo pipefail
 write_module_header "Installing SDDM theme dependencies"
 sudo pacman -S --needed --noconfirm qt6-svg qt6-declarative unzip
 
-write_module_header "Downloading Catppuccin SDDM theme (Mocha)"
+write_module_header "Downloading Catppuccin SDDM theme (Mocha, Mauve accent)"
 TMP_DIR="$(mktemp -d)"
-# Official releases page per catppuccin/sddm's own README instructions.
-# Release asset naming isn't hardcoded here on purpose -- see the
-# discovery step below instead of trusting a guessed folder name.
+# Confirmed from catppuccin/sddm's own README: release assets are named
+# per flavor+accent (e.g. catppuccin-mocha-mauve.zip), not just per
+# flavor -- the earlier "catppuccin-mocha.zip" guess 404'd because of
+# this.
 curl -fsSL -o "${TMP_DIR}/catppuccin-sddm.zip" \
-    "https://github.com/catppuccin/sddm/releases/latest/download/catppuccin-mocha.zip" \
-    || { echo "!! Download failed -- the exact release asset filename wasn't confirmed against a real release, check https://github.com/catppuccin/sddm/releases and adjust the URL above if this 404s" >&2; exit 1; }
+    "https://github.com/catppuccin/sddm/releases/latest/download/catppuccin-mocha-mauve.zip" \
+    || { echo "!! Download failed -- check https://github.com/catppuccin/sddm/releases for the exact current asset name and adjust the URL above if this 404s" >&2; exit 1; }
 
 sudo mkdir -p /usr/share/sddm/themes
 sudo unzip -o "${TMP_DIR}/catppuccin-sddm.zip" -d /usr/share/sddm/themes/
