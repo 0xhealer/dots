@@ -36,10 +36,12 @@ else
 fi
 
 write_module_header "Updating existing AUR packages"
-# This is what actually updates noctalia-shell if it's already installed
-# -- re-listing it in aur.txt below only installs it if MISSING, it does
-# not upgrade an existing install. -Sua updates AUR-originated packages
-# specifically (devel/-git packages included with --devel).
+# NOTE: noctalia (v5) is preferably installed via pacman now
+# (functions/09-noctalia.sh, extra-testing repo) -- this -Sua pass only
+# updates it if it fell back to the AUR install path. If it's on
+# pacman, `sudo pacman -Syu` covers it instead, not this step.
+# -Sua updates AUR-originated packages specifically (devel/-git packages
+# included with --devel).
 yay -Sua --noconfirm || echo "!! AUR update pass reported problems -- check output above, continuing anyway"
 
 write_module_header "Installing AUR packages"

@@ -37,17 +37,17 @@ layout {
 //
 // The actual missing piece for visible blur wasn't compositor config on
 // either leg -- it was Noctalia's own backgroundOpacity defaulting to 1
-// (fully opaque), so there was nothing for the compositor to blur
-// through. Fixed in configs/noctalia/settings.json.
+// (fully opaque), confirmed and fixed for v4. Upgrading to v5 now --
+// its opacity/blur equivalents aren't guessed here, see
+// configs/noctalia/settings.toml's comments.
 
-// NOTE: "qs" "-c" "noctalia-shell" is the v4 (Quickshell) launch command.
-// Confirmed v4 from a running install (noctalia-shell-4.7.7).
+// v5: "noctalia" "--daemon" replaces "qs" "-c" "noctalia-shell" entirely
+// -- v5 is a native binary, no Quickshell/Qt runtime at all. Confirmed
+// from Noctalia's own docs.
 //
 // "vicinae" "server" MUST be running before "vicinae" "toggle" does
-// anything -- confirmed from Vicinae's own docs (docs.vicinae.com). This
-// is the actual reason the launcher wasn't opening: the bind called a
-// bare "vicinae" with no server running and no toggle arg.
-spawn-at-startup "qs" "-c" "noctalia-shell"
+// anything -- confirmed from Vicinae's own docs (docs.vicinae.com).
+spawn-at-startup "noctalia" "--daemon"
 spawn-sh-at-startup "wl-paste --watch cliphist store"
 spawn-at-startup "vicinae" "server"
 
@@ -70,8 +70,8 @@ binds {
     // GPU capability.
     Mod+Shift+Return hotkey-overlay-title="Terminal (foot, VM testing only)" { spawn "foot"; }
 
-    Mod+D hotkey-overlay-title="Noctalia launcher" { spawn "qs" "-c" "noctalia-shell" "--launcher"; }
-    Mod+Space hotkey-overlay-title="Noctalia launcher" { spawn "qs" "-c" "noctalia-shell" "--launcher"; }
+    Mod+D hotkey-overlay-title="Noctalia launcher" { spawn "noctalia" "msg" "panel-toggle" "launcher"; }
+    Mod+Space hotkey-overlay-title="Noctalia launcher" { spawn "noctalia" "msg" "panel-toggle" "launcher"; }
     // Fixed: "vicinae" "toggle", not bare "vicinae" -- see the
     // spawn-at-startup note above.
     Mod+Shift+D hotkey-overlay-title="Vicinae (secondary launcher)" { spawn "vicinae" "toggle"; }
@@ -86,11 +86,13 @@ binds {
     Mod+F hotkey-overlay-title="Fullscreen toggle" { fullscreen-window; }
 
     Mod+Q hotkey-overlay-title="Close window" { close-window; }
-    Mod+Tab hotkey-overlay-title="Noctalia lock screen" { spawn "qs" "-c" "noctalia-shell" "--lock"; }
+    Mod+Tab hotkey-overlay-title="Noctalia lock screen" { spawn "noctalia" "msg" "session" "lock"; }
 
-    // UNVERIFIED: could not confirm the session/logout-panel CLI flag
-    // for Noctalia v4 -- check `qs -c noctalia-shell --help` first
-    Mod+Escape allow-inhibiting=false hotkey-overlay-title="Noctalia control center" { spawn "qs" "-c" "noctalia-shell" "--control-center"; }
+    // v5: confirmed IPC command (cross-referenced from official docs AND
+    // a real working niri config in a first-hand blog post), replaces
+    // the old v4 --control-center flag, which was itself an UNVERIFIED
+    // placeholder that never got confirmed.
+    Mod+Escape allow-inhibiting=false hotkey-overlay-title="Noctalia control center" { spawn "noctalia" "msg" "panel-toggle" "control-center"; }
 
     Mod+V hotkey-overlay-title="Toggle floating" { toggle-window-floating; }
 

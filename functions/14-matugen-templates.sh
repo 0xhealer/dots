@@ -1,18 +1,20 @@
 #!/usr/bin/env bash
 # functions/14-matugen-templates.sh -- module name: "matugen-templates"
 #
+# UNVERIFIED SINCE THE v5 UPGRADE: this was built and confirmed against
+# Noctalia v4's user-templates mechanism (enableUserTheming in
+# settings.json, ~/.config/noctalia/templates/ path convention). v5 uses
+# settings.toml with an unconfirmed schema -- whether this same
+# mechanism exists at all in v5, under what config keys, is unknown.
+# Deploys the same files regardless; verify they actually do anything
+# post-upgrade rather than assuming.
+#
 # Noctalia's own theming engine is matugen-compatible internally
 # (confirmed: its codebase literally has a "MatugenTemplates" module and
 # its TemplateRenderer is described as using "Matugen-compatible
-# syntax"). It already covers kitty/niri/gtk3/gtk4/qt (see
-# functions/09-noctalia.sh). Rofi and Spicetify are NOT in Noctalia's
-# built-in template registry -- this fills that gap using Noctalia's
-# own user-templates mechanism, not a separate standalone matugen
-# process. Single theming pipeline, not two competing ones.
-#
-# Real path convention confirmed from a genuine noctalia-shell GitHub
-# issue (#2468): input files live at ~/.config/noctalia/templates/<app>,
-# rendered output goes to ~/.config/noctalia/templates/colors/<app>.
+# syntax"). Rofi and Spicetify are not in its built-in template
+# registry -- this fills that gap via user-templates rather than a
+# separate standalone matugen process.
 set -euo pipefail
 
 write_module_header "Fetching real matugen templates (rofi, spicetify)"
@@ -50,5 +52,6 @@ copy_dotfile "${DOTFILES_ROOT}/configs/noctalia/user-templates.toml" "$HOME/.con
 write_module_header "Deploying Rofi config with color import"
 copy_dotfile "${DOTFILES_ROOT}/configs/rofi/config.rasi" "$HOME/.config/rofi/config.rasi"
 
-echo "!! Spicetify itself is not installed by this step -- it needs Spotify present first (skipped per request, install manually), and the Spicetify CLI on top of that. This template will sit unused until both exist."
-echo "!! Confirm ~/.config/noctalia/settings.json has enableUserTheming: true (functions/09-noctalia.sh sets this) or these templates won't actually render."
+echo "!! UNVERIFIED post-v5-upgrade: confirm ~/.config/noctalia/settings.toml actually has whatever v5's equivalent of enableUserTheming is, and that v5 even reads user-templates.toml from this same path -- both were only confirmed for v4."
+echo "!! Spicetify itself is not installed by this step -- it needs Spotify present first (skipped per request, install manually), and the Spicetify CLI on top of that."
+

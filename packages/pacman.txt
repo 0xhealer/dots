@@ -72,3 +72,10 @@ tailscale
 # Pro/FiraCode/Hack NF only, see functions/15-fonts.sh for those) --
 # this was a real gap, not a cross-platform decision.
 ttf-jetbrains-mono-nerd
+
+# proton-vpn-gtk-app -- yes, Proton VPN has an official Linux client.
+# Not in winget.txt (that only had Proton.ProtonMail), added per direct
+# request. Confirmed in Arch's own OFFICIAL extra repo, not AUR --
+# Proton maintains a real Arch-native package for this, pulls in
+# proton-vpn-daemon and NetworkManager integration automatically.
+proton-vpn-gtk-app

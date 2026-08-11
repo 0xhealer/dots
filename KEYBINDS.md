@@ -18,7 +18,7 @@ Mod key = Super on both compositors.
 |---------------------|----------------------------------------------------------------|----------------------------------------------------------|-------|
 | Terminal             | `Mod+T` and `Mod+Return`, both -> exec_cmd(terminal)              | `Mod+T` and `Mod+Return`, both -> spawn "kitty"             | Two keys, same action |
 | Terminal (VM testing)   | `Mod+Shift+Return` -> exec_cmd("foot")                            | `Mod+Shift+Return { spawn "foot"; }`                         | TEMPORARY -- remove this bind + foot from pacman.txt once off the VM |
-| App launcher          | `Mod+D` and `Mod+Space`, both -> exec_cmd("qs -c noctalia-shell --launcher") | `Mod+D` and `Mod+Space`, both -> same spawn        | Confirmed CLI flag |
+| App launcher          | `Mod+D` and `Mod+Space`, both -> exec_cmd("noctalia msg panel-toggle launcher") | `Mod+D` and `Mod+Space`, both -> same spawn        | v5 IPC command, confirmed from official docs + a real working niri config |
 | Secondary launcher      | `exec_cmd("vicinae toggle")`, plus `vicinae server` autostarted    | `spawn "vicinae" "toggle"`, plus `vicinae` `server` autostarted | FIXED -- was bare "vicinae" with no server running, confirmed real invocation from Vicinae's own docs |
 | Third launcher          | `Mod+Shift+Space` -> `exec_cmd("rofi -show drun")`                 | `Mod+Shift+Space { spawn "rofi" "-show" "drun"; }`           | rofi-wayland in pacman.txt |
 | Cheatsheet             | `Mod+Shift+Slash` -> `kitty -e less ~/.config/keybindings.txt`     | `Mod+Shift+Slash { show-hotkey-overlay; }`                   | Niri has this natively with app-name titles; Hyprland uses a static file (same pattern as the NixOS box) |
@@ -27,20 +27,42 @@ Mod key = Super on both compositors.
 | Browser               | `hl.bind(mainMod.." + B", hl.dsp.exec_cmd(browser))`               | `Mod+B { spawn "helium-browser"; }`                        | Switched from Zen to Helium per request. Package `helium-browser-bin`, binary `helium-browser` -- confirmed from the AUR package's own PKGBUILD |
 | Fullscreen            | `hl.bind(mainMod.." + F", hl.dsp.window.fullscreen())`             | `Mod+F { fullscreen-window; }`                             | niri's own default binds Mod+F to maximize-column instead -- overridden here |
 | Close window           | `hl.bind(mainMod.." + Q", hl.dsp.window.close())`                  | `Mod+Q { close-window; }`                                  | |
-| Lock screen            | `hl.bind(mainMod.." + Tab", hl.dsp.exec_cmd("qs -c noctalia-shell --lock"))` | `Mod+Tab { spawn "qs" "-c" "noctalia-shell" "--lock"; }`   | Confirmed CLI flag |
-| Session/logout panel    | `hl.bind(mainMod.." + Escape", hl.dsp.exec_cmd("qs -c noctalia-shell --control-center"))` | same pattern | UNVERIFIED -- placeholder, no confirmed logout-specific flag found |
+| Lock screen            | `exec_cmd("noctalia msg session lock")`                            | `spawn "noctalia" "msg" "session" "lock"`                    | v5 IPC command, replaces the v4 --lock flag |
+| Session/logout panel    | `exec_cmd("noctalia msg panel-toggle control-center")`             | `spawn "noctalia" "msg" "panel-toggle" "control-center"`     | v5 IPC command -- also RESOLVES the old v4 UNVERIFIED placeholder, this one is confirmed |
 | Toggle floating          | `hl.dsp.window.float({action="toggle"})` on Mod+V                | `Mod+V { toggle-window-floating; }`                        | Now the same key (V) on both -- fixed the earlier inconsistency |
 | Screenshot (full)         | `grim` via exec_cmd                                             | `Print { screenshot; }`                                     | Different mechanism per leg |
 
-## Blur / transparency
-- The actual bug: Noctalia's `backgroundOpacity` fields default to `1`
-  (fully opaque) -- confirmed from Noctalia's own settings-default.json.
-  All the compositor-side blur config below was correct from early on,
-  but there was nothing transparent for it to blur through. Fixed in
-  `configs/noctalia/settings.json` (`bar`, `dock`, `notifications`,
-  `osd`, `ui.panelBackgroundOpacity` -- field names and example values
-  confirmed from a real user's settings.json in noctalia-shell issue
-  #1864).
+## Noctalia: upgraded v4 -> v5 (5.0.0_beta.7)
+- v4's opacity/blur troubleshooting (backgroundOpacity defaulting to 1,
+  confirmed and fixed via settings.json) is now MOOT -- v5 uses a
+  different config file entirely (settings.toml, not settings.json) and
+  I do not have confirmed opacity/blur key names for v5's fast-moving
+  beta. Rather than guess and repeat the v4 troubleshooting loop,
+  configs/noctalia/settings.toml deliberately ONLY contains fields I
+  could confirm from a real source (theme, wallpaper). Set
+  opacity/blur/anything else via Noctalia's own Settings GUI first --
+  it writes the correct schema for whatever your exact build expects --
+  then run `functions/18-pull-noctalia-settings.sh` (module name
+  "pull-noctalia-settings", NOT part of a normal install.sh run since
+  it's interactive) to bring those GUI-made changes back into this repo.
+- v5 dropped Quickshell/Qt entirely -- it's a native C++/OpenGL ES
+  binary. Launch command changed from `qs -c noctalia-shell` to
+  `noctalia --daemon`; all IPC commands changed from CLI flags
+  (--launcher, --lock, --control-center) to `noctalia msg <command>`.
+  Confirmed from official docs AND cross-checked against a real
+  first-hand blog post showing actual working niri config lines.
+- Package changed from AUR `noctalia-shell` to `noctalia` -- and
+  `noctalia` moved from AUR into Arch's own extra-testing repo about a
+  day before this was written. functions/09-noctalia.sh tries pacman
+  first, falls back to AUR if extra-testing isn't enabled.
+- configs/noctalia/user-templates.toml (Rofi/Spicetify matugen wiring,
+  set up while still on v4) is UNVERIFIED against v5 -- it used v4's
+  confirmed real path convention (~/.config/noctalia/templates/,
+  enableUserTheming in settings.json). Whether v5 uses the same
+  mechanism at all is unconfirmed; don't assume Rofi/Spicetify theming
+  still works post-upgrade without checking.
+
+## Blur / transparency (compositor side -- still applies regardless of Noctalia version)
 - Hyprland: `decoration.blur` (enabled/size/passes/vibrancy) and
   `decoration.active_opacity` / `inactive_opacity` -- confirmed fields
   from Hyprland's own official example hyprland.lua. Noctalia's own
@@ -84,9 +106,14 @@ Mod key = Super on both compositors.
   screens and two idle daemons fighting over the same job.
 
 ## Known gaps -- do not assume parity
-- Noctalia v4 (Quickshell/Qt) and v5 (beta) have different launch
-  commands and config formats entirely. Confirm which one `yay -S
-  noctalia-shell` installs before trusting configs/noctalia/settings.json.
-- Dynamic theming needs `templates.activeTemplates` populated in
-  settings.json (was empty/missing before -- this was the actual bug).
-  Confirmed template ids: kitty, niri, gtk3, gtk4, qt.
+- v5 is genuinely beta (5.0.0_beta.7) -- things may change under you on
+  updates. Re-verify IPC commands and config keys periodically against
+  docs.noctalia.dev/v5/ rather than assuming this file stays accurate.
+- Noctalia's built-in template registry (kitty/niri/gtk3/gtk4/qt) was
+  confirmed for v4. Whether v5 has the same registry, same template ids,
+  or needs re-activating is unconfirmed -- check before assuming
+  wallpaper-driven kitty/gtk theming still works post-upgrade.
+- Hyprland's noctalia-blur layer_rule namespace pattern
+  (noctalia-background-.*$) was confirmed for v4's Quickshell-rendered
+  surfaces. v5's native renderer may use different layer-shell
+  namespaces -- verify with `hyprctl layers` rather than assume.

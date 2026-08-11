@@ -1,6 +1,10 @@
 # One package per line, lines starting with # are ignored.
 # Installed via yay (functions/02-yay-aur.sh)
-noctalia-shell
+# NOTE: noctalia-shell (v4) replaced with v5 -- see functions/09-noctalia.sh,
+# which installs the "noctalia" package (v5, currently 5.0.0_beta.7) via
+# pacman if extra-testing is enabled, falling back to AUR "noctalia" if
+# not. v5 moved from AUR into Arch's own extra-testing repo ~14 hours
+# before this was written -- genuinely new, genuinely beta.
 # vicinae-bin has had intermittent build/checksum breakage on AUR
 # (comments on the package page as of mid-2026) -- if it fails, try
 # plain "vicinae" (builds from source, slower but more likely to work)

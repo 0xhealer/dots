@@ -62,7 +62,15 @@ echo ""
 # -----------------------------------------------------------------------
 # Discover steps
 # -----------------------------------------------------------------------
-mapfile -t step_files < <(find "$FUNCTIONS_DIR" -maxdepth 1 -name '*.sh' -type f | sort)
+# pull-noctalia-settings is interactive (reads a y/N confirmation) and
+# would hang an unscoped run -- excluded from the default "run
+# everything" pass, only runs when named explicitly:
+# ./install.sh pull-noctalia-settings
+if [ "$#" -eq 0 ]; then
+    mapfile -t step_files < <(find "$FUNCTIONS_DIR" -maxdepth 1 -name '*.sh' -type f ! -name '18-pull-noctalia-settings.sh' | sort)
+else
+    mapfile -t step_files < <(find "$FUNCTIONS_DIR" -maxdepth 1 -name '*.sh' -type f | sort)
+fi
 
 if [ "${#step_files[@]}" -eq 0 ]; then
     echo "No steps found in ${FUNCTIONS_DIR}" >&2

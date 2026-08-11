@@ -1,0 +1,22 @@
+# Noctalia v5 settings.toml -- deliberately minimal. Only fields I could
+# confirm from a real source are here (a first-hand blog post showing
+# actual working v5 TOML, cross-referenced against official docs). This
+# is NOT a port of the old v4 settings.json -- the schemas don't match
+# and I'm not translating field-by-field guesses for beta software.
+#
+# Opacity, blur, and template-activation equivalents are intentionally
+# absent. Set them via Settings -> the GUI writes the correct schema for
+# whatever your exact beta.7 build expects, which is more reliable than
+# me guessing at a fast-moving beta's TOML keys. Then run
+# functions/18-pull-noctalia-settings.sh to bring those changes back
+# into this file so they're captured in the repo.
+
+[theme]
+mode = "dark"
+source = "wallpaper"
+wallpaper_scheme = "m3-content"
+
+[wallpaper]
+enabled = true
+directory = "~/Pictures/Wallpapers"
+transition_on_startup = true
