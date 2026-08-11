@@ -2,16 +2,10 @@
   "$schema": "https://github.com/fastfetch-cli/fastfetch/raw/master/doc/json_schema.json",
 
   "logo": {
-    "type": "file",
-    "source": "~/.config/fastfetch/eagle-logo.txt",
-    "color": {
-      "1": "#5EAAA8",
-      "2": "#68B7B2",
-      "3": "#72C3BC",
-      "4": "#7DCFC5",
-      "5": "#88DACE",
-      "6": "#9BE5D8",
-    },
+    "type": "kitty",
+    "source": "~/.config/fastfetch/logo.png",
+    "width": 30,
+    "height": 17,
     "padding": {
       "top": 1,
       "left": 1,

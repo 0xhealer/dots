@@ -56,6 +56,9 @@ dotfiles/
 │   ├── winget.txt / scoop.txt
 │   ├── pacman.txt / aur.txt
 │   └── dnf.txt / apt.txt
+├── assets/
+│   ├── wallpapers/   # Noctalia dynamic theming (module "assets")
+│   └── fastfetch/    # logo.png
 └── fonts/
 ```
 

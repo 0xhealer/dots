@@ -21,6 +21,27 @@ fi
 # shellcheck source=helpers/common.sh
 source "$COMMON_HELPERS"
 
+# -----------------------------------------------------------------------
+# Sudo, entered once
+# -----------------------------------------------------------------------
+# Individual steps (pacman, yay bootstrap) call sudo separately. Without
+# this, sudo's cached-credential timeout can lapse between steps --
+# especially around 02-yay-aur.sh, which can take a while building from
+# source -- and you get prompted again mid-run. Prime the cache once up
+# front and keep it alive in the background for the life of this script.
+echo "This installer needs sudo for package installation -- enter your password once:"
+sudo -v
+
+sudo_keepalive() {
+    while true; do
+        sudo -n true
+        sleep 60
+    done
+}
+sudo_keepalive &
+SUDO_KEEPALIVE_PID=$!
+trap 'kill "$SUDO_KEEPALIVE_PID" 2>/dev/null' EXIT
+
 FUNCTIONS_DIR="${DOTFILES_ROOT}/functions"
 
 echo ""
