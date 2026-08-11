@@ -1,0 +1,7 @@
+# One package per line, lines starting with # are ignored.
+# Installed via: sudo dnf install -
+git
+neovim
+starship
+fastfetch
+hyprland

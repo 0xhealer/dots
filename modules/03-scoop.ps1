@@ -1,0 +1,36 @@
+Set-StrictMode -Version Latest
+$ErrorActionPreference = 'Stop'
+
+Write-ModuleHeader "Configure Scoop"
+
+if (-not (Get-Command scoop -ErrorAction SilentlyContinue)) {
+  Write-Host "[INFO] Installing Scoop..."
+  iex "& {$(irm get.scoop.sh)} -RunAsAdmin"
+
+} 
+
+$env:Path = [System.Environment]::GetEnvironmentVariable(
+  'Path',
+  'Machine'
+) + ';' + [System.Environment]::GetEnvironmentVariable(
+  'Path',
+  'User'
+)
+
+Write-Host "Updating Scoop: $(scoop update)" 
+$Buckets = @(
+  'main'
+  'sysinternals'  
+  'extras'
+  'versions'
+  'nerd-fonts'
+)
+
+foreach ($Bucket in $Buckets) {
+  if (-not (scoop bucket list | Select-String "^$Bucket\s")) {
+    Write-Host "[INFO] Adding Buckets: $Bucket"
+    scoop bucket add $Bucket
+  }
+}
+
+Write-Host "[SUCCESS] Scoop configured" -ForegroundColor Green

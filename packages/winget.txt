@@ -1,0 +1,21 @@
+Git.Git
+Microsoft.PowerShell
+Microsoft.WindowsTerminal
+Microsoft.VisualStudioCode.Insiders
+Microsoft.PowerToys
+Starship.Starship
+VideoLAN.VLC
+Brave.Brave
+Foxit.FoxitReader
+Docker.DockerDesktop
+Obsidian.Obsidian
+RevoUninstaller.RevoUninstaller
+Tailscale.Tailscale
+Microsoft.VCRedist.2015+.x64
+Google.GoogleDrive
+Rustlang.Rust.MSVC
+# Oracle.VirtualBox
+# Hashicorp.Vagrant
+Zen-Team.Zen-Browser
+HandBrake.HandBrake
+Proton.ProtonMail

@@ -1,0 +1,16 @@
+# One package per line, lines starting with # are ignored.
+# Installed via: sudo pacman -S --needed -
+git
+neovim
+starship
+fastfetch
+hyprland
+niri
+# Added -- referenced by configs/hypr and configs/niri keybinds/autostart
+# but weren't in this list yet. Remove any you don't actually want.
+kitty
+thunar
+cliphist
+wl-clipboard
+grim
+slurp

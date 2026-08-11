@@ -1,0 +1,10 @@
+{
+  "_comment": "UNVERIFIED against a real install. Two Noctalia config formats exist depending on version: v4 (Quickshell/Qt) writes ~/.config/noctalia/settings.json in roughly this shape; v5 (beta, no Qt) writes settings.toml at a different path with a different schema entirely. Check `noctalia-shell --version` before deploying this -- deploying the wrong format's file will likely just be ignored or error, not merge.",
+  "theme": {
+    "predefinedScheme": "Catppuccin Mocha",
+    "darkMode": true
+  },
+  "bar": {
+    "position": "top"
+  }
+}

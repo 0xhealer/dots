@@ -1,0 +1,68 @@
+// Niri config -- CachyOS box. KDL format: https://kdl.dev
+// Bar/launcher/lock/session are ALL Noctalia -- no Waybar, no Vicinae.
+// Keybinds mirror KEYBINDS.md -- update that table first, then this file.
+// Action names verified against niri-wm/niri's own default-config.kdl.
+
+input {
+    keyboard {
+        xkb {
+        }
+    }
+    touchpad {
+        tap
+        natural-scroll
+    }
+}
+
+layout {
+    gaps 8
+    focus-ring {
+        width 2
+    }
+}
+
+// NOTE: "qs" "-c" "noctalia-shell" is the v4 (Quickshell) launch command.
+// Noctalia v5 dropped Quickshell/Qt -- if the AUR package is v5 this is
+// wrong. Check `noctalia-shell --version` before trusting this.
+spawn-at-startup "qs" "-c" "noctalia-shell"
+spawn-sh-at-startup "wl-paste --watch cliphist store"
+
+hotkey-overlay {
+    skip-at-startup
+}
+
+binds {
+    Mod+T { spawn "kitty"; }
+    Mod+D hotkey-overlay-title="Noctalia launcher" { spawn "qs" "-c" "noctalia-shell" "--launcher"; }
+    Mod+E { spawn "thunar"; }
+    Mod+B { spawn "zen-browser"; }
+
+    // niri's own default binds Mod+F to maximize-column and
+    // Mod+Shift+F to fullscreen-window. This overrides Mod+F to match
+    // the Hyprland leg's binding in KEYBINDS.md.
+    Mod+F { fullscreen-window; }
+
+    Mod+Q { close-window; }
+    Mod+Tab { spawn "qs" "-c" "noctalia-shell" "--lock"; }
+
+    // UNVERIFIED: could not confirm the session/logout-panel CLI flag
+    // for Noctalia v4 -- check `qs -c noctalia-shell --help` first
+    Mod+Escape allow-inhibiting=false { spawn "qs" "-c" "noctalia-shell" "--control-center"; }
+
+    Mod+V { toggle-window-floating; }
+
+    Print { screenshot; }
+    Alt+Print { screenshot-window; }
+
+    // Workspaces -- kept parallel to the Hyprland leg's 1-4
+    Mod+1 { focus-workspace 1; }
+    Mod+2 { focus-workspace 2; }
+    Mod+3 { focus-workspace 3; }
+    Mod+4 { focus-workspace 4; }
+    Mod+Ctrl+1 { move-column-to-workspace 1; }
+    Mod+Ctrl+2 { move-column-to-workspace 2; }
+    Mod+Ctrl+3 { move-column-to-workspace 3; }
+    Mod+Ctrl+4 { move-column-to-workspace 4; }
+
+    Mod+Shift+E { quit; }
+}

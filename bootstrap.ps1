@@ -1,0 +1,75 @@
+#Requires -Version 5.1
+
+[Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12
+
+Set-ExecutionPolicy Bypass -Scope Process -Force
+Set-StrictMode -Version Latest
+$ErrorActionPreference = 'Stop'
+
+$RepoOwner = '0xhealer'
+$RepoName  = 'dotfiles'
+
+$TempRoot = Join-Path $env:TEMP ("$RepoName-" + [guid]::NewGuid())
+$ZipFile  = "$TempRoot.zip"
+
+try {
+    Write-Host "Downloading dotfiles..." -ForegroundColor Cyan
+
+    $ArchiveUrl = "https://github.com/$RepoOwner/$RepoName/archive/refs/heads/main.zip"
+
+    $maxRetries = 3
+    $success = $false
+
+    for ($i = 1; $i -le $maxRetries; $i++) {
+        try {
+            Write-Host "Downloading (attempt $i/$maxRetries)..." -ForegroundColor Cyan
+            Invoke-WebRequest -Uri $ArchiveUrl -OutFile $ZipFile -UseBasicParsing
+            $success = $true
+            break
+        }
+        catch {
+            Write-Warning $_.Exception.Message
+            Start-Sleep -Seconds 2
+        }
+    }
+
+    if (-not $success) {
+        throw "Failed to download repository after $maxRetries attempts."
+    }
+
+    Write-Host "Extracting archive..." -ForegroundColor Cyan
+
+    Expand-Archive -Path $ZipFile -DestinationPath $TempRoot -Force
+
+    $RepoRoot = Get-ChildItem -Path $TempRoot -Directory | Where-Object {
+        Test-Path (Join-Path $_.FullName "install.ps1")
+    } | Select-Object -First 1
+
+    if (-not $RepoRoot) {
+        throw "Failed to locate extracted repository."
+    }
+
+    $InstallScript = Join-Path $RepoRoot.FullName "install.ps1"
+
+    if (-not (Test-Path $InstallScript)) {
+        throw "install.ps1 not found."
+    }
+
+    Write-Host "Launching installer..." -ForegroundColor Green
+
+    Push-Location $RepoRoot.FullName
+    try {
+        & $InstallScript
+    }
+    finally {
+        Pop-Location
+    }
+}
+finally {
+    Remove-Item $ZipFile -Force -ErrorAction SilentlyContinue
+
+    Write-Host ""
+    Write-Host "Repository extracted to:"
+    Write-Host "  $TempRoot"
+    Write-Host ""
+}
