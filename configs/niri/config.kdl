@@ -108,7 +108,7 @@ binds {
 
     // niri's own default binds Mod+F to maximize-column and
     // Mod+Shift+F to fullscreen-window. This overrides Mod+F to match
-    // the Hyprland leg's binding in KEYBINDS.md.
+    // historical parity with a since-removed Hyprland leg -- kept for consistency.
     Mod+F hotkey-overlay-title="Fullscreen toggle" { fullscreen-window; }
 
     Mod+Q hotkey-overlay-title="Close window" { close-window; }
@@ -125,7 +125,7 @@ binds {
     Print hotkey-overlay-title="Screenshot" { screenshot; }
     Alt+Print hotkey-overlay-title="Screenshot (window)" { screenshot-window; }
 
-    // Workspaces -- kept parallel to the Hyprland leg's 1-4
+    // Workspaces 1-4
     Mod+1 { focus-workspace 1; }
     Mod+2 { focus-workspace 2; }
     Mod+3 { focus-workspace 3; }

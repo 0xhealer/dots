@@ -80,7 +80,7 @@ offset_x = 20
 offset_y = 8
 
 [lockscreen]
-# blurred_desktop needs wlr-screencopy -- both niri and Hyprland support
+# blurred_desktop needs wlr-screencopy -- niri supports
 # this protocol, should work on either leg.
 blurred_desktop = true
 blur_intensity = 0.6
