@@ -28,16 +28,24 @@ layout {
 
 // Kitty opacity, explicit for both focus states -- confirmed real
 // syntax from niri's own docs (window-rule + match is-active=true/false
-// + opacity), cross-checked across 5 independent sources. Without this,
-// kitty had no rule at all, so it fell back to full opacity whenever
-// focused -- reads as "goes opaque when I select it," which is what
-// was reported. Values kept close together (0.88/0.75) rather than a
-// big split, same reasoning as the equivalent Hyprland fix -- a small
-// gap keeps the glass look even while focused instead of jumping to
-// near-opaque on click.
+// + opacity), cross-checked across 5 independent sources.
+//
+// The "goes opaque when I select it" symptom is a CONFIRMED REAL niri
+// bug (niri-wm/niri#1823, "Focus ring color spills over to app window
+// when opacity is set to less than 1"), not a config mistake -- the
+// report describes kitty turning opaque with the focus-ring color as
+// its background specifically while focused, and calls out kitty by
+// name as affected while some other terminals aren't. My earlier
+// 0.88/0.75 values were never going to fix this; the bug happens
+// regardless of which opacity value you pick. The actual workaround is
+// disabling the focus ring for kitty specifically, since that's the
+// thing bleeding through.
 window-rule {
     match app-id="^kitty$" is-active=true
     opacity 0.88
+    focus-ring {
+        off
+    }
 }
 window-rule {
     match app-id="^kitty$" is-active=false

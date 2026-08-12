@@ -97,10 +97,13 @@ Mod key = Super on both compositors.
 - Niri opacity works differently from Hyprland -- no paired
   active/inactive setting, instead separate `window-rule { match
   app-id=... is-active=true/false; opacity X }` blocks per state.
-  Confirmed from niri's own docs across 5 independent sources. Added for
-  kitty (0.88 active / 0.75 inactive) after "goes opaque when I select
-  it" was reported -- kitty had no rule at all before, so focused
-  windows fell back to full opacity.
+  Confirmed from niri's own docs across 5 independent sources.
+- "Goes opaque when I select it" turned out to be a CONFIRMED REAL niri
+  bug (niri-wm/niri#1823), not a config problem -- focus ring color
+  bleeds into semitransparent windows on focus, kitty specifically
+  named as affected. No opacity value fixes this; the workaround is
+  `focus-ring { off }` inside the active-state window-rule for kitty,
+  which is what's actually deployed now.
 
 ## Shell
 - fish is the default login shell throughout (`functions/11-fish.sh`,
