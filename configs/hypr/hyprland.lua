@@ -26,15 +26,23 @@ hl.monitor({
 -------------------------------
 ---- TEMPORARY: VM RENDERING ----
 -------------------------------
--- Real precedent, not a guess -- these are the exact env vars that
--- previously fixed Hyprland + kitty OpenGL failures on this same class
--- of hardware (VMware SVGA virtual GPU) on the NixOS box. kitty needs
--- real OpenGL 3.3+; software rendering sidesteps the SVGA driver
--- entirely instead of fighting it. Remove this whole block (and the
--- other TEMPORARY-tagged bits in this file) once off the VM.
-hl.env("WLR_RENDERER", "pixman")
-hl.env("WLR_NO_HARDWARE_CURSORS", "1")
-hl.env("WLR_RENDERER_ALLOW_SOFTWARE", "1")
+-- REMOVED (was here): WLR_RENDERER=pixman and related software-render
+-- env vars. That was based on real precedent from the NixOS box, but
+-- direct evidence from this VM says otherwise -- Noctalia's own log
+-- showed a successful hardware-accelerated GLES 3.1 context via
+-- VMware's SVGA3D driver, then Hyprland severed its Wayland connection
+-- ("Broken pipe") right as it tried to composite the wallpaper texture.
+-- That's consistent with Hyprland's pixman (software) compositor being
+-- unable to handle a real GPU-backed buffer from a hardware-rendered
+-- client -- i.e. the forced-software renderer was CAUSING this crash,
+-- not preventing one. This VM's driver stack can apparently do real
+-- hardware GL; letting Hyprland use its normal renderer instead.
+--
+-- This means the original kitty OpenGL failure needs to be re-tested
+-- without this override -- it may have had a different cause, or may
+-- come back. If it does, that's new evidence to work from, not a
+-- reason to silently re-add software rendering and reintroduce this
+-- Noctalia crash.
 
 ---------------------
 ---- MY PROGRAMS ----
@@ -77,8 +85,13 @@ hl.config({
         rounding = 8,
         -- Transparency -- confirmed fields from Hyprland's own example
         -- config. 1.0 = opaque; lower = more see-through.
-        active_opacity = 0.95,
-        inactive_opacity = 0.85,
+        -- active_opacity kept close to inactive_opacity on purpose --
+        -- the original 0.95/0.85 split made focused windows jump to
+        -- near-opaque on click, which read as "losing the glass look"
+        -- the moment you actually used the terminal. Small gap instead
+        -- of a big one keeps the glass effect while focused too.
+        active_opacity = 0.88,
+        inactive_opacity = 0.78,
         blur = {
             enabled = true,
             size = 6,

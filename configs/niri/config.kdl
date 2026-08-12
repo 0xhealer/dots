@@ -26,6 +26,24 @@ layout {
     }
 }
 
+// Kitty opacity, explicit for both focus states -- confirmed real
+// syntax from niri's own docs (window-rule + match is-active=true/false
+// + opacity), cross-checked across 5 independent sources. Without this,
+// kitty had no rule at all, so it fell back to full opacity whenever
+// focused -- reads as "goes opaque when I select it," which is what
+// was reported. Values kept close together (0.88/0.75) rather than a
+// big split, same reasoning as the equivalent Hyprland fix -- a small
+// gap keeps the glass look even while focused instead of jumping to
+// near-opaque on click.
+window-rule {
+    match app-id="^kitty$" is-active=true
+    opacity 0.88
+}
+window-rule {
+    match app-id="^kitty$" is-active=false
+    opacity 0.75
+}
+
 // Blur -- niri 26.04 (April 2026) added blur via the ext-background-effect
 // protocol. Noctalia, Vicinae, Foot, Kitty, Ghostty, and Quickshell all
 // get it with NO config needed here at all, per niri's own release notes

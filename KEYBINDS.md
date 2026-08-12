@@ -94,6 +94,13 @@ Mod key = Super on both compositors.
   the niri side -- confirmed again by Noctalia's own v5 FAQ, which
   describes niri publishing blur regions automatically even for
   transparent bars.
+- Niri opacity works differently from Hyprland -- no paired
+  active/inactive setting, instead separate `window-rule { match
+  app-id=... is-active=true/false; opacity X }` blocks per state.
+  Confirmed from niri's own docs across 5 independent sources. Added for
+  kitty (0.88 active / 0.75 inactive) after "goes opaque when I select
+  it" was reported -- kitty had no rule at all before, so focused
+  windows fell back to full opacity.
 
 ## Shell
 - fish is the default login shell throughout (`functions/11-fish.sh`,
