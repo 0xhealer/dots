@@ -2,6 +2,23 @@
 
 set -euo pipefail
 
+# Reconnect stdin to the real terminal, even when this script is being
+# read from a pipe (curl ... | bash). Without this, stdin is the pipe
+# itself -- sudo usually falls back to /dev/tty directly for its own
+# prompt regardless, but that fallback behavior isn't something to
+# leave to chance when the whole point is zero interaction after the
+# first password entry. This one line makes every subsequent read in
+# this script and everything it execs behave as if run normally in a
+# terminal.
+if [ -t 0 ]; then
+    : # already an interactive terminal, nothing to do
+elif [ -e /dev/tty ]; then
+    exec < /dev/tty
+else
+    echo "No terminal available (stdin isn't a tty and /dev/tty doesn't exist) -- can't prompt for sudo. Download this script and run it directly instead of piping through curl." >&2
+    exit 1
+fi
+
 REPO_OWNER="0xhealer"
 REPO_NAME="dots"
 
@@ -12,10 +29,6 @@ ARCHIVE_FILE="${TEMP_ROOT}.tar.gz"
 
 cleanup() {
   rm -rf "$ARCHIVE_FILE"
-  echo ""
-  echo "Repository extracted to: "
-  echo "  $TEMP_ROOT"
-  echo ""
 }
 
 trap cleanup EXIT
@@ -51,4 +64,14 @@ fi
 
 echo "Launching installer..."
 chmod +x "$INSTALL_SCRIPT"
-(cd "$TEMP_ROOT" && "$INSTALL_SCRIPT")
+cd "$TEMP_ROOT"
+echo "Repository extracted to: $TEMP_ROOT"
+echo ""
+# Archive itself is no longer needed once extracted -- clean it up
+# explicitly here since the EXIT trap won't fire after exec below (this
+# process becomes install.sh, it doesn't return to run the trap).
+rm -rf "$ARCHIVE_FILE"
+# exec replaces this process with install.sh instead of spawning it as
+# a child of a subshell -- one less layer of process nesting for the
+# sudo keepalive's background job to potentially get tangled in.
+exec "$INSTALL_SCRIPT" "$@"

@@ -13,6 +13,12 @@ set -euo pipefail
 DOTFILES_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 export DOTFILES_ROOT
 
+# Same stdin safeguard as bootstrap.sh -- belt and suspenders in case
+# this ever gets run some other piped way instead of via bootstrap.sh.
+if [ ! -t 0 ] && [ -e /dev/tty ]; then
+    exec < /dev/tty
+fi
+
 COMMON_HELPERS="${DOTFILES_ROOT}/helpers/common.sh"
 if [ ! -f "$COMMON_HELPERS" ]; then
     echo "helpers/common.sh not found." >&2

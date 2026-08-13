@@ -4,7 +4,6 @@ git
 neovim
 starship
 fastfetch
-hyprland
 niri
 # Added -- referenced by configs/hypr and configs/niri keybinds/autostart
 # but weren't in this list yet. Remove any you don't actually want.

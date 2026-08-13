@@ -11,7 +11,3 @@ echo -e "\033[32m[SUCCESS] Wallpapers deployed to ~/Pictures/Wallpapers\033[0m"
 
 write_module_header "Deploying fastfetch logo"
 copy_dotfile "${DOTFILES_ROOT}/assets/fastfetch/logo.png" "$HOME/.config/fastfetch/logo.png"
-
-write_module_header "Deploying keybindings cheatsheet"
-copy_dotfile "${DOTFILES_ROOT}/assets/keybindings.txt" "$HOME/.config/keybindings.txt"
-echo "!! Hyprland leg: Mod+Shift+Slash opens this via 'kitty -e less'. Niri leg uses its own native hotkey-overlay instead (same key) -- this file isn't used there."

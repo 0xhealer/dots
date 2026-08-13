@@ -1,146 +1,80 @@
-# Unified Keybind Reference -- Hyprland vs Niri
+# Keybind Reference -- Niri
 
 Single source of truth. When you change a binding, update this table
-FIRST, then propagate to configs/hypr/hyprland.lua and
-configs/niri/config.kdl.
+FIRST, then propagate to configs/niri/config.kdl.
+
+Hyprland was removed from this setup -- Niri only, per request. If
+you're looking for the old Hyprland/Niri comparison, dual-compositor
+history, or the Hyprland-specific fixes (VM rendering, blur namespace,
+etc.), that's in git history before this file was rewritten.
 
 Noctalia provides the bar, launcher, lock screen, and session/logout
-panel on BOTH compositors natively. Vicinae, Rofi, and Spotify were
-added back in as secondary/tertiary apps per request -- Vicinae and
-Rofi are NOT the primary launcher, Noctalia still is.
+panel natively. Vicinae and Rofi are secondary/tertiary launchers added
+per request -- Noctalia's own launcher stays primary.
 
-Hyprland config is now Lua (hyprland.lua) -- Hyprland 0.55 (May 2026,
-current stable) deprecated the old hyprlang .conf syntax.
+Mod key = Super.
 
-Mod key = Super on both compositors.
-
-| Action              | Hyprland (Lua)                                              | Niri                                                    | Notes |
-|---------------------|----------------------------------------------------------------|----------------------------------------------------------|-------|
-| Terminal             | `Mod+T` and `Mod+Return`, both -> exec_cmd(terminal)              | `Mod+T` and `Mod+Return`, both -> spawn "kitty"             | Two keys, same action |
-| Terminal (VM testing)   | `Mod+Shift+Return` -> exec_cmd("foot")                            | `Mod+Shift+Return { spawn "foot"; }`                         | TEMPORARY -- remove this bind + foot from pacman.txt once off the VM |
-| App launcher          | `Mod+D` and `Mod+Space`, both -> exec_cmd("noctalia msg panel-toggle launcher") | `Mod+D` and `Mod+Space`, both -> same spawn        | v5 IPC command, confirmed from official docs + a real working niri config |
-| Secondary launcher      | `exec_cmd("vicinae toggle")`, plus `vicinae server` autostarted    | `spawn "vicinae" "toggle"`, plus `vicinae` `server` autostarted | FIXED -- was bare "vicinae" with no server running, confirmed real invocation from Vicinae's own docs |
-| Third launcher          | `Mod+Shift+Space` -> `exec_cmd("rofi -show drun")`                 | `Mod+Shift+Space { spawn "rofi" "-show" "drun"; }`           | rofi-wayland in pacman.txt |
-| Cheatsheet             | `Mod+Shift+Slash` -> `kitty -e less ~/.config/keybindings.txt`     | `Mod+Shift+Slash { show-hotkey-overlay; }`                   | Niri has this natively with app-name titles; Hyprland uses a static file (same pattern as the NixOS box) |
-| Music (Spotify)         | `hl.bind(mainMod.." + M", hl.dsp.exec_cmd("spotify"))`             | `Mod+M { spawn "spotify"; }`                                | |
-| File manager          | `hl.bind(mainMod.." + E", hl.dsp.exec_cmd(fileManager))`           | `Mod+E { spawn "thunar"; }`                                | |
-| Browser               | `hl.bind(mainMod.." + B", hl.dsp.exec_cmd(browser))`               | `Mod+B { spawn "helium-browser"; }`                        | Switched from Zen to Helium per request. Package `helium-browser-bin`, binary `helium-browser` -- confirmed from the AUR package's own PKGBUILD |
-| Fullscreen            | `hl.bind(mainMod.." + F", hl.dsp.window.fullscreen())`             | `Mod+F { fullscreen-window; }`                             | niri's own default binds Mod+F to maximize-column instead -- overridden here |
-| Close window           | `hl.bind(mainMod.." + Q", hl.dsp.window.close())`                  | `Mod+Q { close-window; }`                                  | |
-| Lock screen            | `exec_cmd("noctalia msg session lock")`                            | `spawn "noctalia" "msg" "session" "lock"`                    | v5 IPC command, replaces the v4 --lock flag |
-| Session/logout panel    | `exec_cmd("noctalia msg panel-toggle control-center")`             | `spawn "noctalia" "msg" "panel-toggle" "control-center"`     | v5 IPC command -- also RESOLVES the old v4 UNVERIFIED placeholder, this one is confirmed |
-| Toggle floating          | `hl.dsp.window.float({action="toggle"})` on Mod+V                | `Mod+V { toggle-window-floating; }`                        | Now the same key (V) on both -- fixed the earlier inconsistency |
-| Screenshot (full)         | `grim` via exec_cmd                                             | `Print { screenshot; }`                                     | Different mechanism per leg |
-
-## Noctalia: upgraded v4 -> v5 (5.0.0_beta.7)
-- v4's opacity/blur troubleshooting (backgroundOpacity in settings.json)
-  is moot -- v5 uses `~/.config/noctalia/config.toml`, a completely
-  different file, name, and schema. (v5 also has a settings.toml, but
-  that's a separate GUI-managed override file at
-  ~/.local/state/noctalia/ containing only deltas from config.toml --
-  not something this repo writes to. See
-  functions/18-pull-noctalia-settings.sh, which reads that file and
-  shows you the diff rather than overwriting anything.)
-- Full opacity/blur/transparency config now confirmed from Noctalia's
-  own official example.toml (not guessed): `shell.panel.transparency_mode
-  = "glass"` is the actual frosted-glass toggle for panels;
-  `bar.main.background_opacity`, `notification.background_opacity`,
-  `osd.background_opacity`, `lockscreen.blur_intensity`,
-  `backdrop.blur_intensity` cover the rest. All set in
-  configs/noctalia/config.toml.
-- Same bug class as v4's empty `activeTemplates`: v5's
-  `theme.templates.builtin_ids` also defaults to an empty list --
-  wallpaper-driven colors get generated but applied to nothing until
-  apps are listed. Populated with kitty/niri/gtk3/gtk4/qt as a best
-  guess carried over from v4's confirmed ids -- UNVERIFIED that v5 uses
-  the same spelling, run `noctalia theme --list-templates` to confirm.
-- Rofi/Spicetify user templates now declared directly in config.toml
-  under `[theme.templates.user.<name>]` -- this is v5's real, confirmed
-  schema, NOT a separate user-templates.toml file (that was a
-  carried-over v4 assumption that turned out wrong).
-- v5 dropped Quickshell/Qt entirely -- it's a native C++/OpenGL ES
-  binary. Launch command changed from `qs -c noctalia-shell` to
-  `noctalia` (no flag -- an earlier version of this file had
-  `noctalia --daemon` for Hyprland based on a generic doc line; the
-  Hyprland-specific docs AND a real working Hyprland+Noctalia-v5+CachyOS
-  dotfiles repo both confirm no flag is correct there). All IPC
-  commands changed from CLI flags (--launcher, --lock, --control-center)
-  to `noctalia msg <command>`.
-  Confirmed from official docs AND cross-checked against a real
-  first-hand blog post showing actual working niri config lines.
-- Package changed from AUR `noctalia-shell` to `noctalia` -- and
-  `noctalia` moved from AUR into Arch's own extra-testing repo about a
-  day before this was written. functions/09-noctalia.sh tries pacman
-  first, falls back to AUR if extra-testing isn't enabled.
-- configs/noctalia/user-templates.toml (Rofi/Spicetify matugen wiring,
-  set up while still on v4) is UNVERIFIED against v5 -- it used v4's
-  confirmed real path convention (~/.config/noctalia/templates/,
-  enableUserTheming in settings.json). Whether v5 uses the same
-  mechanism at all is unconfirmed; don't assume Rofi/Spicetify theming
-  still works post-upgrade without checking.
-
-## Blur / transparency (compositor side -- still applies regardless of Noctalia version)
-- Hyprland: `decoration.blur` (enabled/size/passes/vibrancy) and
-  `decoration.active_opacity` / `inactive_opacity` -- confirmed fields
-  from Hyprland's own official example hyprland.lua. Noctalia's own
-  surfaces get an additional `layer_rule` blur targeting its namespace
-  -- now confirmed twice over (Vicinae's own docs use the same shape,
-  and a real working rice repo, R7rainz/dotfiles, uses this exact rule
-  for Noctalia, which is also where `blur_popups` and the namespace's
-  trailing `$` came from).
-- Niri: got native blur support in 26.04 (April 2026) via
-  ext-background-effect. Kitty, Noctalia, and Vicinae are all listed by
-  niri's own release notes as already supporting it with zero config on
-  the niri side -- confirmed again by Noctalia's own v5 FAQ, which
-  describes niri publishing blur regions automatically even for
-  transparent bars.
-- Niri opacity works differently from Hyprland -- no paired
-  active/inactive setting, instead separate `window-rule { match
-  app-id=... is-active=true/false; opacity X }` blocks per state.
-  Confirmed from niri's own docs across 5 independent sources.
-- "Goes opaque when I select it" turned out to be a CONFIRMED REAL niri
-  bug (niri-wm/niri#1823), not a config problem -- focus ring color
-  bleeds into semitransparent windows on focus, kitty specifically
-  named as affected. No opacity value fixes this; the workaround is
-  `focus-ring { off }` inside the active-state window-rule for kitty,
-  which is what's actually deployed now.
-
-## Shell
-- fish is the default login shell throughout (`functions/11-fish.sh`,
-  module name "fish"), with starship wired in via
-  `configs/shell/config.fish` (`starship init fish | source`) instead of
-  fish's own prompt/greeting.
+| Action              | Niri                                                        | Notes |
+|---------------------|---------------------------------------------------------------|-------|
+| Terminal             | `Mod+T` and `Mod+Return`, both -> `spawn "kitty"`             | Two keys, same action |
+| Terminal (VM testing)   | `Mod+Shift+Return { spawn "foot"; }`                         | TEMPORARY -- remove this bind + foot from pacman.txt once off the VM |
+| App launcher          | `Mod+D` and `Mod+Space`, both -> `spawn "noctalia" "msg" "panel-toggle" "launcher"` | Confirmed v5 IPC command |
+| Secondary launcher      | `Mod+Shift+D { spawn "vicinae" "toggle"; }`                    | Needs `vicinae server` autostarted first -- confirmed from Vicinae's own docs |
+| Third launcher          | `Mod+Shift+Space { spawn "rofi" "-show" "drun"; }`             | rofi-wayland in pacman.txt |
+| Music (Spotify)         | `Mod+M { spawn "spotify"; }`                                  | Spotify itself skipped from aur.txt (manual install) -- bind works once you've installed it some other way |
+| File manager          | `Mod+E { spawn "thunar"; }`                                   | |
+| Browser               | `Mod+B { spawn "helium-browser"; }`                           | Package `helium-browser-bin` in aur.txt |
+| Fullscreen            | `Mod+F { fullscreen-window; }`                                | niri's own default binds Mod+F to maximize-column instead -- overridden here |
+| Close window           | `Mod+Q { close-window; }`                                     | |
+| Lock screen            | `Mod+Tab { spawn "noctalia" "msg" "session" "lock"; }`         | Confirmed v5 IPC command |
+| Session/logout panel    | `Mod+Escape { spawn "noctalia" "msg" "panel-toggle" "control-center"; }` | Confirmed v5 IPC command |
+| Toggle floating          | `Mod+V { toggle-window-floating; }`                            | |
+| Screenshot (full)         | `Print { screenshot; }`                                        | Native niri action |
+| Screenshot (window)       | `Alt+Print { screenshot-window; }`                             | |
+| Cheatsheet             | `Mod+Shift+Slash { show-hotkey-overlay; }`                     | Native niri feature -- every bind above has a `hotkey-overlay-title` so it shows app names, not just raw actions |
 
 ## Theming (wallpaper-driven, central)
-- Noctalia's own theming engine already runs a matugen-compatible
-  pipeline internally (`theme.source: "wallpaper"` in settings.json) --
-  covers kitty, niri, gtk3, gtk4, qt out of the box. Do NOT add a
-  separate standalone matugen process on top of this; it would just be
-  running the same pipeline twice.
-- Rofi and Spicetify aren't in Noctalia's built-in template registry,
-  so they're wired in via Noctalia's own user-template mechanism
-  instead (`enableUserTheming: true` + `configs/noctalia/user-templates.toml`,
-  deployed by `functions/14-matugen-templates.sh`, module name
-  "matugen-templates"). Real template files are pulled from
-  InioX/matugen-themes at install time rather than hand-written --
-  matugen's exact template syntax wasn't something worth guessing at.
+- Noctalia's own theming engine runs a matugen-compatible pipeline
+  internally (`theme.source = "wallpaper"` in config.toml) -- covers
+  kitty, niri, gtk3, gtk4, qt via `theme.templates.builtin_ids`
+  (currently a best guess carried over from v4's confirmed ids, run
+  `noctalia theme --list-templates` to confirm v5's actual spelling).
+- Rofi and Spicetify aren't in the builtin registry -- wired in via
+  `theme.templates.user.<name>` blocks directly in config.toml
+  (confirmed real v5 schema from the official example.toml). Template
+  files themselves pulled from InioX/matugen-themes at install time
+  (functions/14-matugen-templates.sh) rather than hand-written.
 - Spicetify template is scaffolded but inert until Spotify itself is
-  installed (currently manual/deferred) and Spicetify CLI is set up on
-  top of it.
-- Do NOT add hyprlock, hypridle, or a separate wallpaper daemon
-  (hyprpaper/swww) -- Noctalia already owns lock screen, idle behavior,
-  and wallpaper on both compositors. Adding these would create two lock
-  screens and two idle daemons fighting over the same job.
+  installed (manual/deferred) and Spicetify CLI is set up.
+
+## Blur / transparency
+- The actual blur/frosted-glass toggle is `shell.panel.transparency_mode
+  = "glass"` in config.toml (confirmed from Noctalia's own official
+  example.toml) -- not something found through trial and error.
+  `bar.main.background_opacity`, `notification.background_opacity`,
+  `osd.background_opacity`, `lockscreen.blur_intensity`,
+  `backdrop.blur_intensity` cover the rest.
+- Niri got native blur support in 26.04 (April 2026) via
+  ext-background-effect. Kitty, Noctalia, and Vicinae all get it with
+  zero config on niri's side, confirmed from niri's own release notes
+  and independently from Noctalia's own v5 FAQ.
+- Kitty opacity needs explicit `window-rule` blocks (niri has no paired
+  active/inactive setting like some compositors do) -- confirmed real
+  syntax from niri's own docs across 5 independent sources.
+- "Goes opaque when focused" was a CONFIRMED REAL niri bug
+  (niri-wm/niri#1823, focus-ring color bleeding into semitransparent
+  windows), not a config problem -- kitty specifically named as
+  affected in the report. No opacity value fixes it; the workaround
+  deployed is `focus-ring { off }` inside kitty's active-state
+  window-rule.
 
 ## Known gaps -- do not assume parity
-- v5 is genuinely beta (5.0.0_beta.7) -- things may change under you on
-  updates. Re-verify IPC commands and config keys periodically against
-  docs.noctalia.dev/v5/ rather than assuming this file stays accurate.
-- Noctalia's built-in template registry (kitty/niri/gtk3/gtk4/qt) was
-  confirmed for v4. Whether v5 has the same registry, same template ids,
-  or needs re-activating is unconfirmed -- check before assuming
-  wallpaper-driven kitty/gtk theming still works post-upgrade.
-- Hyprland's noctalia-blur layer_rule namespace pattern
-  (noctalia-background-.*$) was confirmed for v4's Quickshell-rendered
-  surfaces. v5's native renderer may use different layer-shell
-  namespaces -- verify with `hyprctl layers` rather than assume.
+- Noctalia v5 is genuinely beta (5.0.0_beta.7) -- re-verify IPC
+  commands and config keys periodically against docs.noctalia.dev/v5/
+  rather than assuming this file stays accurate forever.
+- GUI-made Noctalia changes live at
+  `~/.local/state/noctalia/settings.toml`, a separate file from
+  `configs/noctalia/config.toml` that this repo manages --
+  `functions/18-pull-noctalia-settings.sh` reads that file and shows
+  the diff rather than overwriting anything, since it's a set of deltas
+  on top of config.toml, not a full config.

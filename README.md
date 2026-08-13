@@ -14,7 +14,7 @@
 ## Overview
 
 Personal, modular dotfiles for both machines I use day to day: a Windows box
-and a CachyOS (Arch) Linux box running Hyprland/Niri with the Noctalia shell.
+and a CachyOS (Arch) Linux box running Niri with the Noctalia shell.
 Configs, fonts, and package lists live in one shared tree; each platform gets
 its own installer entrypoint, helper library, and numbered install steps, so
 either machine can be bootstrapped from a clean install with a single command.
@@ -51,7 +51,7 @@ dotfiles/
 ├── configs/
 │   ├── git/ nvim/ starship/ fastfetch/ vscode/
 │   ├── powershell/ windows-terminal/
-│   └── hypr/ niri/ noctalia/ shell/ terminal/
+│   └── niri/ noctalia/ shell/ terminal/
 ├── packages/
 │   ├── winget.txt / scoop.txt
 │   ├── pacman.txt / aur.txt

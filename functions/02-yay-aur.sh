@@ -68,6 +68,6 @@ done
 if [ "${#failed_packages[@]}" -gt 0 ]; then
     echo ""
     echo -e "\033[31m!! The following AUR packages failed to install: ${failed_packages[*]}\033[0m"
-    echo "!! This step is NOT treated as a fatal failure -- later steps (hyprland, niri, noctalia, assets) will still run."
+    echo "!! This step is NOT treated as a fatal failure -- later steps (niri, noctalia, assets) will still run."
     echo "!! For vicinae-bin specifically: if it fails, try 'yay -S vicinae' instead (builds from source, slower, historically more reliable)."
 fi
