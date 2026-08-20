@@ -7,7 +7,7 @@ Set-StrictMode -Version Latest
 $ErrorActionPreference = 'Stop'
 
 $RepoOwner = '0xhealer'
-$RepoName  = 'dotfiles'
+$RepoName  = 'dots'
 
 $TempRoot = Join-Path $env:TEMP ("$RepoName-" + [guid]::NewGuid())
 $ZipFile  = "$TempRoot.zip"
