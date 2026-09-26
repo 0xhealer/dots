@@ -14,8 +14,11 @@ Tailscale.Tailscale
 Microsoft.VCRedist.2015+.x64
 Google.GoogleDrive
 Rustlang.Rust.MSVC
-# Oracle.VirtualBox
-# Hashicorp.Vagrant
-Zen-Team.Zen-Browser
 HandBrake.HandBrake
-Proton.ProtonMail
+RazerInc.RazerInstaller.Synapse4
+Anthropic.Claude
+Anthropic.ClaudeCode
+ArduinoSA.IDE.stable
+AppWork.JDownloader
+Oracle.JDK.17
+WinSCP.WinSCP.RC
