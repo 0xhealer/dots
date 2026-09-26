@@ -11,6 +11,11 @@ if (-not $env:EDITOR) {
     $env:EDITOR = 'nvim'
 }
 
+# Directories in `ls` output: coloured text only, no background block.
+if ($PSStyle -and $PSStyle.FileInfo) {
+    $PSStyle.FileInfo.Directory = $PSStyle.Foreground.BrightBlue
+}
+
 $Parts = @(
     'functions\system.ps1'
     'functions\utils.ps1'
