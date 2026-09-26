@@ -8,7 +8,9 @@ write_module_header "Deploying fish config"
 copy_dotfile "${DOTFILES_ROOT}/configs/shell/config.fish" "$HOME/.config/fish/config.fish"
 
 write_module_header "Setting fish as default shell"
-FISH_PATH="$(command -v fish)"
+# `|| true`: under errexit a failing `command -v` would kill the step
+# before the friendly message below could print.
+FISH_PATH="$(command -v fish || true)"
 if [ -z "$FISH_PATH" ]; then
     echo "fish not found on PATH -- is it in packages/pacman.txt and installed?" >&2
     exit 1

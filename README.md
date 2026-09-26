@@ -5,8 +5,8 @@
   <img src="https://img.shields.io/badge/Linux-FCC624?style=for-the-badge&logo=linux&logoColor=black" alt="Linux">
   <img src="https://img.shields.io/badge/CachyOS-0088CC?style=for-the-badge&logo=arch-linux&logoColor=white" alt="CachyOS">
   <br>
-  <img src="https://img.shields.io/github/last-commit/0xhealer/dotfiles?style=flat-square" alt="Last commit">
-  <img src="https://img.shields.io/github/license/0xhealer/dotfiles?style=flat-square" alt="License">
+  <img src="https://img.shields.io/github/last-commit/0xhealer/dots?style=flat-square" alt="Last commit">
+  <img src="https://img.shields.io/github/license/0xhealer/dots?style=flat-square" alt="License">
   <img src="https://img.shields.io/badge/shell-PowerShell%20%7C%20Bash-89e051?style=flat-square" alt="Shell">
   <img src="https://img.shields.io/badge/PRs-welcome-brightgreen?style=flat-square" alt="PRs welcome">
 </p>
@@ -29,18 +29,30 @@ One-liner remote bootstrap — downloads the repo and runs the installer for you
 
 ### Windows
 ```powershell
-iwr -useb https://raw.githubusercontent.com/0xhealer/dotfiles/main/bootstrap.ps1 | iex
+iwr -useb https://raw.githubusercontent.com/0xhealer/dots/main/bootstrap.ps1 | iex
 ```
+
+The installer relaunches itself as Administrator, runs every module in
+`modules/` in order, and restarts the machine 15 seconds after a fully
+successful run (partial runs with `-Modules` never restart).
 
 ### Linux
 ```shell
 curl -fsSL "https://raw.githubusercontent.com/0xhealer/dots/main/bootstrap.sh" | bash
 ```
 
+Targets Arch/CachyOS. Run as your normal user (not root); it asks for your
+sudo password once. To pass step names through the one-liner:
+`curl -fsSL .../bootstrap.sh | bash -s -- starship git`.
+
+A failing step no longer stops the run (except `prerequisites`); failures
+are listed at the end and the installer exits non-zero. Re-run just those
+steps by name.
+
 ## Layout
 
 ```
-dotfiles/
+dots/
 ├── install.ps1 / install.sh
 ├── bootstrap.ps1 / bootstrap.sh
 ├── helpers/
@@ -49,7 +61,8 @@ dotfiles/
 ├── modules/
 ├── functions/
 ├── configs/
-│   ├── git/ nvim/ starship/ fastfetch/ vscode/
+│   ├── git/ nvim/ fastfetch/ vscode/ rofi/ hypr/
+│   ├── starship.toml
 │   ├── powershell/ windows-terminal/
 │   └── niri/ noctalia/ shell/ terminal/
 ├── packages/
@@ -72,3 +85,7 @@ Run a subset of steps by name (works the same on both platforms):
 ```shell
 ./install.sh starship git
 ```
+
+Step names are the file names without the number prefix
+(`functions/04-starship.sh` -> `starship`). `pull-noctalia-settings` is
+opt-in: it only runs when named explicitly.

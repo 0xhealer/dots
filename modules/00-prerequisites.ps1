@@ -54,10 +54,14 @@ Write-Host "[SUCCESS] Windows version '$($WindowsVersion)' supported" -Foregroun
 
 Write-ModuleHeader "Create Common Directories"
 
+# Documents can be redirected (OneDrive known-folder move, custom location),
+# so ask Windows instead of assuming $HOME\Documents.
+$Documents = [Environment]::GetFolderPath("MyDocuments")
+
 $Directories = @(
   "$HOME\.config",
-  "$HOME\Documents\PowerShell",
-  "$HOME\Documents\WindowsPowerShell",
+  "$Documents\PowerShell",
+  "$Documents\WindowsPowerShell",
   "$HOME\workspace"
 )
 foreach ($Directory in $Directories) {
@@ -74,15 +78,9 @@ foreach ($Directory in $Directories) {
 
 Write-ModuleHeader "Refresh PATH"
 
-$env:Path = [System.Environment]::GetEnvironmentVariable(
-  'Path',
-  'Machine'
-) + ';' + [System.Environment]::GetEnvironmentVariable(
-  'Path',
-  'User'
-)
+Update-SessionPath
 
-Write-Host "[SUUCESS] PATH refreshed" -ForegroundColor Green
+Write-Host "[SUCCESS] PATH refreshed" -ForegroundColor Green
 
 Write-ModuleHeader "NuGet Check"
 

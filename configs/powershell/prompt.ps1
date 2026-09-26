@@ -23,4 +23,8 @@ function Show-PromptHeader {
     Write-Host ""
 }
 
-Show-PromptHeader
+# The header uses the `e escape, which only exists in PowerShell 7+;
+# Windows PowerShell 5.1 would print it literally.
+if ($PSVersionTable.PSVersion.Major -ge 7) {
+    Show-PromptHeader
+}

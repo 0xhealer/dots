@@ -5,6 +5,8 @@ neovim
 starship
 fastfetch
 niri
+# unzip -- needed by functions/15-fonts.sh (font archives) and 12-sddm-theme.sh
+unzip
 # Added -- referenced by configs/hypr and configs/niri keybinds/autostart
 # but weren't in this list yet. Remove any you don't actually want.
 kitty

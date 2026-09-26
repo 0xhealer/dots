@@ -4,6 +4,11 @@
 # the rest of the setup. Source: https://github.com/catppuccin/sddm
 set -euo pipefail
 
+if ! pacman -Q sddm &> /dev/null; then
+    echo -e "\033[33m[SKIP] SDDM is not installed on this machine -- nothing to theme (install 'sddm' and re-run './install.sh sddm-theme' if you want it)\033[0m"
+    exit 0
+fi
+
 write_module_header "Installing SDDM theme dependencies"
 sudo pacman -S --needed --noconfirm qt6-svg qt6-declarative unzip
 

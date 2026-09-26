@@ -9,15 +9,9 @@ if (-not (Get-Command scoop -ErrorAction SilentlyContinue)) {
 
 } 
 
-$env:Path = [System.Environment]::GetEnvironmentVariable(
-  'Path',
-  'Machine'
-) + ';' + [System.Environment]::GetEnvironmentVariable(
-  'Path',
-  'User'
-)
+Update-SessionPath
 
-Write-Host "Updating Scoop: $(scoop update)" 
+Write-Host "Updating Scoop: $(scoop update)"
 $Buckets = @(
   'main'
   'sysinternals'  
@@ -26,8 +20,17 @@ $Buckets = @(
   'nerd-fonts'
 )
 
+# `scoop bucket list` emits objects, not text. Piping them through
+# Select-String matched against "@{Name=main; ...}" so "^main\s" never
+# matched and every run tried (and noisily failed) to re-add every bucket.
+$ExistingBuckets = @(
+  scoop bucket list | ForEach-Object {
+    if ($_.PSObject.Properties['Name']) { $_.Name }
+  }
+)
+
 foreach ($Bucket in $Buckets) {
-  if (-not (scoop bucket list | Select-String "^$Bucket\s")) {
+  if ($Bucket -notin $ExistingBuckets) {
     Write-Host "[INFO] Adding Buckets: $Bucket"
     scoop bucket add $Bucket
   }

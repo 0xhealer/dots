@@ -17,7 +17,8 @@ test_command_exists() {
 
 new_backup_directory() {
     local category="$1"
-    local backup_dir="$HOME/.config/backups/$(date +%Y-%m-%d)/${category}"
+    local backup_dir
+    backup_dir="$HOME/.config/backups/$(date +%Y-%m-%d)/${category}"
     mkdir -p "$backup_dir"
     echo "$backup_dir"
 }
