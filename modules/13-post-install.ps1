@@ -644,6 +644,27 @@ catch {
     Write-Warning "Failed to enable Ultimate Performance plan - $($_.Exception.Message)"
 }
 
+# --- Clean Start menu: no pinned stubs (WhatsApp/LinkedIn...), no Recent/recommended ---
+Write-Host "[CONFIG] Clean Start menu" -ForegroundColor Yellow
+foreach ($R in @(
+    @($Ex, "Start_TrackDocs", 0),
+    @($Ex, "Start_TrackProgs", 0),
+    @($Ex, "Start_IrisRecommendations", 0),
+    @($Ex, "Start_AccountNotifications", 0),
+    @("$W\Explorer", "HideRecentlyAddedApps", 1),
+    @("$W\Explorer", "ShowOrHideMostUsedApps", 2),
+    @("HKLM:\SOFTWARE\Microsoft\PolicyManager\current\device\Start", "HideRecentlyAddedApps", 1),
+    @("HKLM:\SOFTWARE\Microsoft\PolicyManager\current\device\Start", "HideRecommendedSection", 1)
+)) { Set-Reg $R[0] $R[1] $R[2] }
+
+# WhatsApp/LinkedIn etc. are Store *stubs* pinned by Start's cached layout,
+# not installed packages, so removing Appx packages never touches them.
+# Deleting the pin cache resets Start to an empty pinned list.
+Stop-Process -Name StartMenuExperienceHost -Force -ErrorAction SilentlyContinue
+foreach ($F in @('start.bin', 'start2.bin')) {
+    Remove-Item "$env:LOCALAPPDATA\Packages\Microsoft.Windows.StartMenuExperienceHost_cw5n1h2txyewy\LocalState\$F" -Force -ErrorAction SilentlyContinue
+}
+
 # --- Restart Explorer to apply UI changes (no pause/exit: this is a module) ---
 Stop-Process -Name explorer -Force -ErrorAction SilentlyContinue
 Start-Process explorer.exe
