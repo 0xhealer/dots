@@ -23,8 +23,13 @@ write_module_header "Fetching real matugen templates (rofi, spicetify)"
 TMP_DIR="$(mktemp -d)"
 git clone --depth 1 https://github.com/InioX/matugen-themes.git "${TMP_DIR}/matugen-themes"
 
-ROFI_TEMPLATE="$(find "${TMP_DIR}/matugen-themes/templates" -iname '*rofi*' -type f | head -n1)"
-SPOTIFY_TEMPLATE="$(find "${TMP_DIR}/matugen-themes/templates" -iname '*spicetify*' -o -iname '*sleek*' -type f 2>/dev/null | head -n1)"
+# `|| true`: with pipefail, a missing templates/ dir would otherwise abort
+# the step here instead of reaching the friendly "could not find" message.
+# The parentheses matter: without them `-type f` only applied to the
+# `-iname '*sleek*'` branch, so a *directory* named spicetify could match
+# and then blow up the `cp` below.
+ROFI_TEMPLATE="$(find "${TMP_DIR}/matugen-themes" -type f -iname '*rofi*' 2>/dev/null | head -n1 || true)"
+SPOTIFY_TEMPLATE="$(find "${TMP_DIR}/matugen-themes" -type f \( -iname '*spicetify*' -o -iname '*sleek*' \) 2>/dev/null | head -n1 || true)"
 
 # Paths match config.toml's [theme.templates.user.*].input_path entries exactly.
 mkdir -p "$HOME/.config/noctalia/templates"
@@ -47,5 +52,13 @@ rm -rf "$TMP_DIR"
 
 write_module_header "Deploying Rofi config with color import"
 copy_dotfile "${DOTFILES_ROOT}/configs/rofi/config.rasi" "$HOME/.config/rofi/config.rasi"
+
+# config.rasi @imports ~/.config/rofi/colors.rasi, which Noctalia only
+# generates once it has run and themed. Until then rofi would error on the
+# missing import, so seed an empty placeholder (Noctalia overwrites it).
+if [ ! -e "$HOME/.config/rofi/colors.rasi" ]; then
+    printf '/* placeholder -- overwritten by Noctalia theming */\n* { }\n' > "$HOME/.config/rofi/colors.rasi"
+    echo -e "\033[32m[SUCCESS] Seeded placeholder ~/.config/rofi/colors.rasi\033[0m"
+fi
 
 echo "!! Spicetify itself is not installed by this step, only its CLI package (spicetify-cli, see pacman.txt) -- it still needs Spotify present first (skipped per request, install manually) before the theme actually applies to anything."

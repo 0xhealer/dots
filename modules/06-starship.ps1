@@ -17,7 +17,7 @@ $StarshipConfig = Join-Path `
 
 $SourceConfig = Join-Path `
     $Global:DotfilesRoot `
-    "configs\starship\starship.toml"
+    "configs\starship.toml"
 
 # -----------------------------------------------------------------------------
 # Create Directory

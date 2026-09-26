@@ -10,11 +10,20 @@ $PackageFile = Join-Path `
 $Packages = Get-PackageList `
     -File $PackageFile
 
+# `scoop list` emits objects (Name, Version, ...), not text, so the old
+# Select-String "^name\s" check never matched and every package was
+# reinstalled on every run.
+$InstalledPackages = @(
+    scoop list | ForEach-Object {
+        if ($_.PSObject.Properties['Name']) { $_.Name }
+    }
+)
+
 foreach ($Package in $Packages) {
 
     try {
 
-        if (-not (scoop list | Select-String "^$Package\s")) {
+        if ($Package -notin $InstalledPackages) {
 
             Write-Host "[INSTALL] $Package" `
                 -ForegroundColor Yellow

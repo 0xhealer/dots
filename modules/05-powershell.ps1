@@ -82,20 +82,33 @@ Set-Content -Path $LegacyProfile -Value $Bootstrap -Encoding UTF8 -Force
 # Deploy user profile
 # -------------------------------------------------
 
-$SourceProfile = Join-Path $Global:DotfilesRoot "configs\powershell\user_profile.ps1"
+# The whole configs\powershell tree is deployed (user_profile.ps1 plus the
+# aliases / fzf / zoxide / keybinds / prompt files and functions\ it loads).
+# Previously only a single user_profile.ps1 was copied -- and that file did
+# not exist in the repo, so this module threw and stopped the installer.
+
+$SourceDir     = Join-Path $Global:DotfilesRoot "configs\powershell"
+$SourceProfile = Join-Path $SourceDir "user_profile.ps1"
 
 if (-not (Test-Path $SourceProfile)) {
     throw "PowerShell profile not found: $SourceProfile"
 }
 
+if (Test-Path $UserProfile) {
+    Backup-Item `
+        -Source $UserProfile `
+        -Destination (Join-Path $BackupDir "user_profile.ps1")
+}
+
 Copy-Item `
-    -Path $SourceProfile `
-    -Destination $UserProfile `
+    -Path (Join-Path $SourceDir "*") `
+    -Destination $ConfigRoot `
+    -Recurse `
     -Force
 
 Write-Host "[SUCCESS] PowerShell configured successfully." -ForegroundColor Green
 Write-Host "Bootstrap profiles created:" -ForegroundColor DarkGray
-Write-Host "  • $PwshProfile" -ForegroundColor DarkGray
-Write-Host "  • $LegacyProfile" -ForegroundColor DarkGray
-Write-Host "User profile deployed to:" -ForegroundColor DarkGray
-Write-Host "  • $UserProfile" -ForegroundColor DarkGray
+Write-Host "  - $PwshProfile" -ForegroundColor DarkGray
+Write-Host "  - $LegacyProfile" -ForegroundColor DarkGray
+Write-Host "Profile files deployed to:" -ForegroundColor DarkGray
+Write-Host "  - $ConfigRoot" -ForegroundColor DarkGray

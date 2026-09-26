@@ -3,13 +3,13 @@
 // functions/14-matugen-templates.sh -- NOT a static palette, changes
 // with the wallpaper same as kitty/gtk/qt do.
 //
-// Import path is the ACTUAL output_path from
-// configs/noctalia/user-templates.toml, not rofi's own suggested
-// default (~/.config/rofi/colors.rasi) -- we deliberately keep
-// generated files under Noctalia's own templates/colors/ directory
-// rather than scattering matugen output across every app's own config
-// dir, so use the absolute path here to match.
-@import "~/.config/noctalia/templates/colors/rofi.rasi"
+// Import path is the output_path of [theme.templates.user.rofi] in
+// configs/noctalia/config.toml (the file that is actually deployed).
+// This used to point at ~/.config/noctalia/templates/colors/rofi.rasi
+// (the old, undeployed user-templates.toml), which Noctalia never wrote
+// to. functions/14-matugen-templates.sh seeds a placeholder so the import
+// resolves before Noctalia's first run.
+@import "~/.config/rofi/colors.rasi"
 
 configuration {
     modi: "drun,run,window";

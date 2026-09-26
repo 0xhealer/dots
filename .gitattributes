@@ -1,0 +1,10 @@
+# Keep scripts LF regardless of the contributor's core.autocrlf: a CRLF
+# shebang line ("bash\r") makes the Linux installer fail to start, and the
+# shared .gitconfig sets autocrlf=true for the Windows leg.
+* text=auto eol=lf
+*.sh  text eol=lf
+*.ps1 text eol=lf
+*.png binary
+*.jpg binary
+*.jpeg binary
+*.zip binary

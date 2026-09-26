@@ -9,7 +9,7 @@ set -euo pipefail
 
 write_module_header "Enabling Docker"
 sudo systemctl enable --now docker.service
-if ! groups "$USER" | grep -q docker; then
+if ! id -nG "$USER" | tr ' ' '\n' | grep -qx docker; then
     sudo usermod -aG docker "$USER"
     echo -e "\033[33m[INFO] Added ${USER} to the docker group -- log out and back in for this to take effect (docker commands need sudo until then)\033[0m"
 fi

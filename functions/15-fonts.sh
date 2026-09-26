@@ -11,7 +11,13 @@ write_module_header "Installing Nerd Fonts"
 FONT_DIR="$HOME/.local/share/fonts"
 mkdir -p "$FONT_DIR"
 
+if ! test_command_exists unzip; then
+    echo "unzip is required (it is in packages/pacman.txt -- run './install.sh pacman-packages' first)" >&2
+    exit 1
+fi
+
 for zip in "${DOTFILES_ROOT}"/fonts/*.zip; do
+    [ -e "$zip" ] || { echo "No font archives found in ${DOTFILES_ROOT}/fonts" >&2; exit 1; }
     name="$(basename "$zip" .zip)"
     echo "Extracting ${name}..."
     unzip -oq "$zip" -d "${FONT_DIR}/${name}"

@@ -5,7 +5,7 @@ set -euo pipefail
 
 write_module_header "Deploying starship config"
 mkdir -p "$HOME/.config"
-copy_dotfile "${DOTFILES_ROOT}/configs/starship/starship.toml" "$HOME/.config/starship.toml"
+copy_dotfile "${DOTFILES_ROOT}/configs/starship.toml" "$HOME/.config/starship.toml"
 
 SHELL_RC="$HOME/.bashrc"
 if ! grep -q 'starship init bash' "$SHELL_RC" 2>/dev/null; then

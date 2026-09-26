@@ -24,6 +24,16 @@ function Test-CommandExists {
         -ErrorAction SilentlyContinue)
 }
 
+# Re-reads Machine + User PATH into the current process. Installers (winget,
+# scoop) update PATH in the registry only, so a later module in the SAME run
+# would not find git / code-insiders / nvim until PATH is refreshed.
+function Update-SessionPath {
+    $Machine = [System.Environment]::GetEnvironmentVariable('Path', 'Machine')
+    $User    = [System.Environment]::GetEnvironmentVariable('Path', 'User')
+
+    $env:Path = (@($Machine, $User) | Where-Object { $_ }) -join ';'
+}
+
 function New-BackupDirectory {
     param(
         [Parameter(Mandatory)]

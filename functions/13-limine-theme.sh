@@ -11,10 +11,13 @@
 set -euo pipefail
 
 write_module_header "Locating limine.conf"
-LIMINE_CONF="$(find /boot -maxdepth 3 -type f -name 'limine.conf' 2>/dev/null | head -n1)"
+# sudo: the ESP is typically mounted with a root-only umask, so a plain
+# `find` as the normal user cannot even traverse /boot and would wrongly
+# report "not found".
+LIMINE_CONF="$(sudo find /boot -maxdepth 3 -type f -name 'limine.conf' 2>/dev/null | head -n1 || true)"
 if [ -z "$LIMINE_CONF" ]; then
-    echo "limine.conf not found under /boot -- is this box actually using Limine?" >&2
-    exit 1
+    echo -e "\033[33m[SKIP] limine.conf not found under /boot -- this machine doesn't use Limine, nothing to theme\033[0m"
+    exit 0
 fi
 echo "Found: ${LIMINE_CONF}"
 
@@ -45,14 +48,32 @@ declare -A COLOR_KEYS=(
 # confirmed the correct value if you want the terminal background
 # explicitly set too.
 
+# Work on a private copy, then copy it back over the original (cp onto an
+# existing file keeps its owner/mode). Reading needs sudo too -- the file
+# is root-only, so an unprivileged `grep` would treat it as empty and
+# append duplicate keys on every run.
+#
+# Global options MUST come before the first boot entry ("/Name" lines): a
+# `key: value` line appended at the end of the file is parsed as part of
+# the LAST entry, not as a global setting, so the theme would never apply.
+WORK_COPY="$(mktemp)"
+trap 'rm -f "$WORK_COPY" "${WORK_COPY}.new"' EXIT
+# shellcheck disable=SC2024  # intentional: WORK_COPY is a user-owned temp file
+sudo cat "$LIMINE_CONF" > "$WORK_COPY"
+
 for key in "${!COLOR_KEYS[@]}"; do
     value="${COLOR_KEYS[$key]}"
-    if grep -qE "^${key}:" "$LIMINE_CONF"; then
-        sudo sed -i "s|^${key}:.*|${key}: ${value}|" "$LIMINE_CONF"
+    if grep -qE "^${key}:" "$WORK_COPY"; then
+        sed -i "s|^${key}:.*|${key}: ${value}|" "$WORK_COPY"
+    elif grep -qm1 '^/' "$WORK_COPY"; then
+        awk -v line="${key}: ${value}" '!done && /^\// { print line; done=1 } { print }' "$WORK_COPY" > "${WORK_COPY}.new"
+        mv "${WORK_COPY}.new" "$WORK_COPY"
     else
-        echo "${key}: ${value}" | sudo tee -a "$LIMINE_CONF" > /dev/null
+        echo "${key}: ${value}" >> "$WORK_COPY"
     fi
 done
+
+sudo cp "$WORK_COPY" "$LIMINE_CONF"
 
 echo -e "\033[32m[SUCCESS] Color keys applied\033[0m"
 echo "!! Changes to limine.conf take effect on next boot, no command needed -- but VERIFY the file looks right (cat ${LIMINE_CONF}) before rebooting, and keep the backup path above handy"

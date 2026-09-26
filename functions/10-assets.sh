@@ -11,3 +11,8 @@ echo -e "\033[32m[SUCCESS] Wallpapers deployed to ~/Pictures/Wallpapers\033[0m"
 
 write_module_header "Deploying fastfetch logo"
 copy_dotfile "${DOTFILES_ROOT}/assets/fastfetch/logo.png" "$HOME/.config/fastfetch/logo.png"
+
+# The Hyprland leg binds Mod+Shift+/ to `kitty -e less ~/.config/keybindings.txt`
+# but nothing ever deployed that file.
+write_module_header "Deploying keybindings cheatsheet"
+copy_dotfile "${DOTFILES_ROOT}/assets/keybindings.txt" "$HOME/.config/keybindings.txt"
