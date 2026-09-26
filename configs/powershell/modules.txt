@@ -1,6 +1,0 @@
-Terminal-Icons
-CompletionPredictor
-PSReadLine
-PSScriptAnalyzer
-PSWindowsUpdate
-PSFzf
