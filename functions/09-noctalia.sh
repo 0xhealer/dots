@@ -6,6 +6,11 @@
 # names were both wrong for v5.
 set -euo pipefail
 
+if ! is_arch; then
+    echo -e "\033[33m[SKIP] Noctalia is only packaged for Arch/CachyOS -- on ${DOTS_DISTRO} the session runs without it (rofi is the launcher; terminals/rofi/compositors are themed by configs/theme)\033[0m"
+    exit 0
+fi
+
 write_module_header "Installing Noctalia v5"
 if pacman -Si noctalia &> /dev/null; then
     sudo pacman -S --needed --noconfirm noctalia

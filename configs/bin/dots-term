@@ -1,0 +1,8 @@
+#!/usr/bin/env bash
+# dots-term [args...] -- open the first terminal that is installed:
+# kitty > ghostty > foot. Set DOTS_TERMINAL=<name> to force one.
+for t in "${DOTS_TERMINAL:-}" kitty ghostty foot; do
+    [ -n "$t" ] && command -v "$t" > /dev/null && exec "$t" "$@"
+done
+echo "dots-term: no terminal found (kitty, ghostty, foot)" >&2
+exit 1

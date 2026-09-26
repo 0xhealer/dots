@@ -12,7 +12,7 @@ write_module_header "Setting fish as default shell"
 # before the friendly message below could print.
 FISH_PATH="$(command -v fish || true)"
 if [ -z "$FISH_PATH" ]; then
-    echo "fish not found on PATH -- is it in packages/pacman.txt and installed?" >&2
+    echo "fish not found on PATH -- is it in packages/linux.txt and installed?" >&2
     exit 1
 fi
 

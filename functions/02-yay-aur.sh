@@ -16,6 +16,11 @@ if [ "$(git config --global --get core.autocrlf 2>/dev/null || echo unset)" = "t
     git config --global core.autocrlf input
 fi
 
+if ! is_arch; then
+    echo -e "\033[33m[SKIP] The AUR is Arch-only -- nothing to do on ${DOTS_DISTRO}\033[0m"
+    exit 0
+fi
+
 write_module_header "Verify yay"
 
 if ! test_command_exists yay; then

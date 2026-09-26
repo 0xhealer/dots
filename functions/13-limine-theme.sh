@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # functions/13-limine-theme.sh -- module name: "limine-theme"
-# Patches ONLY the color keys in /boot/limine.conf to a Catppuccin
-# Mocha palette -- does not touch kernel entries, timeout, default
+# Patches ONLY the color keys in /boot/limine.conf to the wallpaper
+# palette (configs/theme) -- does not touch kernel entries, timeout, default
 # boot target, or anything else CachyOS manages in that file.
 #
 # /boot/limine.conf is bootloader-critical. This backs the file up
@@ -26,19 +26,24 @@ BACKUP="${LIMINE_CONF}.backup-$(date +%Y%m%d-%H%M%S)"
 sudo cp "$LIMINE_CONF" "$BACKUP"
 echo -e "\033[32m[SUCCESS] Backed up to ${BACKUP} -- restore with: sudo cp ${BACKUP} ${LIMINE_CONF}\033[0m"
 
-write_module_header "Applying Catppuccin Mocha color keys"
-# term_palette / term_palette_bright are the standard Catppuccin Mocha
-# ANSI 16-color mapping -- these hex values are the well-known official
-# Catppuccin Mocha palette, confirmed independent of any single source.
-# interface_branding_color / interface_help_color(_bright) are
-# confirmed valid limine.conf keys per catppuccin/limine's own README.
+write_module_header "Applying wallpaper-theme color keys"
+# Colours come from the same palette as every other config
+# (configs/theme -> ~/.config/theme/theme.conf). Re-run this step after
+# changing the wallpaper to update the boot menu too.
+# interface_branding_color / interface_help_color(_bright) are confirmed
+# valid limine.conf keys per catppuccin/limine's own README.
+THEME_CONF="$HOME/.config/theme/theme.conf"
+[ -f "$THEME_CONF" ] || THEME_CONF="${DOTFILES_ROOT}/configs/theme/theme.conf"
+tc() {  # theme colour without the leading '#'
+    sed -n "s/^$1 *= *#\{0,1\}//p" "$THEME_CONF" | head -n1
+}
 declare -A COLOR_KEYS=(
-    [term_palette]="1e1e2e;f38ba8;a6e3a1;f9e2af;89b4fa;f5c2e7;94e2d5;cdd6f4"
-    [term_palette_bright]="585b70;f38ba8;a6e3a1;f9e2af;89b4fa;f5c2e7;94e2d5;cdd6f4"
-    [term_foreground]="cdd6f4"
-    [interface_branding_color]="cdd6f4"
-    [interface_help_color]="a6adc8"
-    [interface_help_color_bright]="cdd6f4"
+    [term_palette]="$(tc black);$(tc red);$(tc green);$(tc yellow);$(tc blue);$(tc magenta);$(tc cyan);$(tc white)"
+    [term_palette_bright]="$(tc bright_black);$(tc bright_red);$(tc bright_green);$(tc bright_yellow);$(tc bright_blue);$(tc bright_magenta);$(tc bright_cyan);$(tc bright_white)"
+    [term_foreground]="$(tc fg)"
+    [interface_branding_color]="$(tc primary)"
+    [interface_help_color]="$(tc fg_dim)"
+    [interface_help_color_bright]="$(tc fg)"
 )
 # NOTE: deliberately NOT setting term_background here -- the one
 # reference I found for it used a value ("ffffffff") that looks

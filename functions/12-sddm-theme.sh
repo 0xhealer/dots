@@ -4,6 +4,11 @@
 # the rest of the setup. Source: https://github.com/catppuccin/sddm
 set -euo pipefail
 
+if ! is_arch; then
+    echo -e "\033[33m[SKIP] SDDM theming is only wired up for Arch/CachyOS (its Qt6 dependencies are installed with pacman)\033[0m"
+    exit 0
+fi
+
 if ! pacman -Q sddm &> /dev/null; then
     echo -e "\033[33m[SKIP] SDDM is not installed on this machine -- nothing to theme (install 'sddm' and re-run './install.sh sddm-theme' if you want it)\033[0m"
     exit 0

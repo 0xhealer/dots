@@ -1,30 +1,33 @@
-Keybinds -- Hyprland leg (Mod = Super)
-Source of truth is KEYBINDS.md in the repo root -- update that first.
+Keybinds -- Hyprland and niri (Mod = Super)
 
-  Mod + T              Terminal (kitty)
-  Mod + Return          Terminal (kitty)
-  Mod + Shift + Return    Terminal (foot) -- VM testing only, remove later
+  Mod + T / Return          Terminal (kitty > ghostty > foot, whichever is installed)
+  Mod + Shift + Return       Terminal: ghostty
+  Mod + Ctrl + Return        Terminal: foot
 
-  Mod + D              App launcher (Noctalia)
-  Mod + Space           App launcher (Noctalia)
-  Mod + Shift + D        Secondary launcher (Vicinae)
-  Mod + Shift + Space     Third launcher (Rofi)
+  Mod + D / Space           Launcher (Rofi: apps)
+  Mod + Shift + D            Rofi: run command
+  Mod + Shift + Space        Rofi: window switcher
 
-  Mod + M              Music (Spotify -- manual install)
-  Mod + E              File manager (Thunar)
-  Mod + B              Browser (Helium)
+  Mod + W                   Pick a wallpaper -> palette of every app updates
+  Mod + Shift + W            Random wallpaper -> palette of every app updates
 
-  Mod + F              Fullscreen toggle
-  Mod + Q              Close window
-  Mod + V              Toggle floating
+  Mod + M                   Music (Spotify -- manual install)
+  Mod + E                   File manager (Thunar)
+  Mod + B                   Browser (Helium > Brave > Firefox)
 
-  Mod + Tab             Lock screen (Noctalia)
-  Mod + Escape          Control center (Noctalia)
+  Mod + F                   Fullscreen toggle
+  Mod + Q                   Close window
+  Mod + V                   Toggle floating
 
-  Mod + Delete          Screenshot, full (grim)
-  Delete               Screenshot, region (grim + slurp)
+  Mod + Tab                 Lock screen (Noctalia, if installed)
+  Mod + Escape              Control center (Noctalia, if installed)
 
-  Mod + 1..4            Switch workspace 1-4
-  Mod + Shift + 1..4      Move window to workspace 1-4
+  Hyprland:  Mod + Delete   Screenshot, full (grim)
+             Delete         Screenshot, region (grim + slurp)
+  niri:      Print          Screenshot;  Alt + Print: window
 
-  Mod + Shift + Slash     Show this cheatsheet
+  Mod + 1..4                Switch workspace 1-4
+  Hyprland:  Mod + Shift + 1..4    Move window to workspace
+  niri:      Mod + Ctrl + 1..4     Move column to workspace
+
+  Mod + Shift + Slash       Show this cheatsheet (niri: built-in overlay)

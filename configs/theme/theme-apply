@@ -1,0 +1,95 @@
+#!/usr/bin/env bash
+# theme-apply -- one palette for the whole desktop, driven by the wallpaper.
+#
+#   theme-apply <image>     use this wallpaper: derive the palette, render every app's colours, reload
+#   theme-apply --random    same with a random image from the wallpaper folder
+#   theme-apply --pick      choose the wallpaper from a rofi menu
+#   theme-apply --render    re-render from ~/.config/theme/theme.conf (after editing it by hand)
+#   theme-apply --restore   session start: re-set the wallpaper and make sure colours exist
+#
+# ~/.config/theme/theme.conf is the palette; every app config includes a file
+# rendered from it into ~/.config/theme/generated/ (kitty, foot, ghostty, rofi,
+# hyprland, niri, fish). Wallpaper folder: $DOTS_WALLPAPERS (default
+# ~/Pictures/Wallpapers). Set DOTS_WALLPAPER_SETTER=none to leave the
+# wallpaper to something else.
+set -euo pipefail
+
+THEME_DIR="${DOTS_THEME_DIR:-$HOME/.config/theme}"
+CONF="$THEME_DIR/theme.conf"
+GEN="$THEME_DIR/generated"
+WALLS="${DOTS_WALLPAPERS:-$HOME/Pictures/Wallpapers}"
+PY="$(command -v python3 || true)"
+
+die() { echo "theme-apply: $*" >&2; exit 1; }
+[ -n "$PY" ] || die "python3 not found"
+
+render() {
+    "$PY" "$THEME_DIR/palette.py" --render "$CONF" "$THEME_DIR/templates" "$GEN"
+    niri_inline
+}
+
+# niri < 25.11 has no `include`; the deploy step leaves a flag + a base config
+# and we splice the generated colours straight into config.kdl instead.
+niri_inline() {
+    local base="$HOME/.config/niri/config.kdl.base"
+    [ -f "$THEME_DIR/.niri-inline" ] && [ -f "$base" ] || return 0
+    awk -v gen="$GEN/niri.kdl" '
+        /^[[:space:]]*include[[:space:]]+".*theme\/generated\/niri\.kdl"/ || /^[[:space:]]*include[[:space:]]+".*niri\.kdl"/ {
+            while ((getline l < gen) > 0) print l; next }
+        { print }' "$base" > "$HOME/.config/niri/config.kdl"
+}
+
+set_wallpaper() {
+    local img="$1"
+    [ "${DOTS_WALLPAPER_SETTER:-swaybg}" = "none" ] && return 0
+    [ -n "${WAYLAND_DISPLAY:-}" ] || return 0
+    command -v swaybg > /dev/null || { echo "theme-apply: swaybg not installed, wallpaper not set" >&2; return 0; }
+    pkill -x swaybg 2> /dev/null || true
+    nohup swaybg -i "$img" -m fill > /dev/null 2>&1 &
+    disown || true
+}
+
+reload() {
+    pkill -USR1 -x kitty 2> /dev/null || true                       # kitty live-reloads
+    if [ -n "${HYPRLAND_INSTANCE_SIGNATURE:-}" ] && command -v hyprctl > /dev/null; then
+        hyprctl reload > /dev/null 2>&1 || true
+    fi
+    # niri watches its included files itself; foot/ghostty/rofi pick the new
+    # colours up on next launch.
+}
+
+list_walls() {
+    find -L "$WALLS" -maxdepth 2 -type f \( -iname '*.png' -o -iname '*.jpg' -o -iname '*.jpeg' -o -iname '*.webp' \) 2> /dev/null | sort
+}
+
+apply_image() {
+    local img
+    img="$(readlink -f "$1")"
+    [ -f "$img" ] || die "not a file: $1"
+    "$PY" "$THEME_DIR/palette.py" "$img" --out "$CONF"
+    render
+    set_wallpaper "$img"
+    reload
+    echo "theme applied from $(basename "$img")"
+}
+
+case "${1:-}" in
+    --render)
+        render; reload ;;
+    --restore)
+        [ -d "$GEN" ] && [ -n "$(ls -A "$GEN" 2> /dev/null)" ] || render
+        wp="$(sed -n 's/^wallpaper *= *//p' "$CONF" | head -n1)"
+        if [ -n "$wp" ] && [ -f "$wp" ]; then set_wallpaper "$wp"; fi ;;
+    --random)
+        mapfile -t all < <(list_walls)
+        [ "${#all[@]}" -gt 0 ] || die "no images in $WALLS"
+        apply_image "${all[RANDOM % ${#all[@]}]}" ;;
+    --pick)
+        command -v rofi > /dev/null || die "rofi not installed"
+        choice="$(list_walls | sed "s|^$WALLS/||" | rofi -dmenu -i -p "wallpaper")" || exit 0
+        [ -n "$choice" ] && apply_image "$WALLS/$choice" ;;
+    ""|-h|--help)
+        sed -n '2,12p' "$0" | sed 's/^# \{0,1\}//' ;;
+    *)
+        apply_image "$1" ;;
+esac

@@ -28,7 +28,10 @@ wallpaper_placement = "attached"
 session_placement = "attached"
 
 [wallpaper]
-enabled = true
+# Off: the wallpaper is set by theme-apply (swaybg), the same step that
+# derives the palette every other config uses. Two wallpaper owners would
+# fight over the background layer.
+enabled = false
 directory = "~/Pictures/Wallpapers"
 transition_on_startup = true
 
@@ -44,18 +47,15 @@ enable_builtin_templates = true
 # run on the live system to confirm spelling/casing hasn't changed.
 # This is the same bug class as v4's empty activeTemplates -- leaving
 # this list empty means NOTHING gets themed regardless of source=wallpaper.
-builtin_ids = ["kitty", "niri", "gtk3", "gtk4", "qt"]
+# kitty / niri / rofi are deliberately NOT here: their colours come from
+# configs/theme (theme-apply), the one palette shared by every config.
+builtin_ids = ["gtk3", "gtk4", "qt"]
 enable_community_templates = true
 
-# Rofi and Spicetify aren't in the builtin registry -- user templates
-# now declared directly here (v5's real schema), NOT in a separate
-# user-templates.toml file like the old v4-era approach. Template files
-# themselves still pulled from InioX/matugen-themes at install time --
-# see functions/14-matugen-templates.sh.
-[theme.templates.user.rofi]
-input_path = "~/.config/noctalia/templates/rofi.rasi"
-output_path = "~/.config/rofi/colors.rasi"
-
+# Spicetify isn't in the builtin registry -- user template declared
+# directly here (v5's real schema). The template file itself is pulled
+# from InioX/matugen-themes at install time -- see
+# functions/14-matugen-templates.sh.
 [theme.templates.user.spicetify]
 input_path = "~/.config/noctalia/templates/spicetify.ini"
 output_path = "~/.config/spicetify/Themes/Sleek/color.ini"
