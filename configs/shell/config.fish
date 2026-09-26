@@ -1,4 +1,13 @@
-# fish config -- CachyOS box, default shell throughout.
+# fish config -- default shell throughout.
+
+# ~/.local/bin holds theme-apply's launchers (dots-term, dots-browser) and
+# the bat/fd links on Debian-family distros.
+fish_add_path -g $HOME/.local/bin
+
+# Syntax colours from the wallpaper-driven palette (see configs/theme).
+if test -f $HOME/.config/theme/generated/fish.fish
+    source $HOME/.config/theme/generated/fish.fish
+end
 
 if status is-interactive
     # Starship prompt -- replaces fish's own default greeting/prompt.

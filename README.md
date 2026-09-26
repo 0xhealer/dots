@@ -14,7 +14,8 @@
 ## Overview
 
 Personal, modular dotfiles for both machines I use day to day: a Windows box
-and a CachyOS (Arch) Linux box running Niri with the Noctalia shell.
+and a Linux box (CachyOS/Arch, Fedora, Ubuntu or Kali) running Niri or
+Hyprland with Rofi as the launcher.
 Configs, fonts, and package lists live in one shared tree; each platform gets
 its own installer entrypoint, helper library, and numbered install steps, so
 either machine can be bootstrapped from a clean install with a single command.
@@ -41,8 +42,9 @@ successful run (partial runs with `-Modules` never restart).
 curl -fsSL "https://raw.githubusercontent.com/0xhealer/dots/main/bootstrap.sh" | bash
 ```
 
-Targets Arch/CachyOS. Run as your normal user (not root); it asks for your
-sudo password once. To pass step names through the one-liner:
+Detects the distro (CachyOS, Arch, Fedora, Ubuntu, Kali, Debian) and uses
+its package manager and package names. Run as your normal user (not root);
+it asks for your sudo password once. To pass step names through the one-liner:
 `curl -fsSL .../bootstrap.sh | bash -s -- starship git`.
 
 A failing step no longer stops the run (except `prerequisites`); failures
@@ -64,16 +66,53 @@ dots/
 │   ├── git/ nvim/ fastfetch/ vscode/ rofi/ hypr/
 │   ├── starship.toml
 │   ├── powershell/ windows-terminal/
-│   └── niri/ noctalia/ shell/ terminal/
+│   ├── niri/ noctalia/ shell/
+│   ├── terminal/          # kitty, foot, ghostty
+│   ├── theme/             # wallpaper-driven palette (see Theming)
+│   └── bin/               # dots-term, dots-browser
 ├── packages/
 │   ├── winget.txt / scoop.txt
-│   ├── pacman.txt / aur.txt
-│   └── dnf.txt / apt.txt
+│   └── linux.txt / aur.txt    # one table for all distros; AUR is Arch-only
 ├── assets/
-│   ├── wallpapers/   # Noctalia dynamic theming (module "assets")
+│   ├── wallpapers/   # the palette is derived from these (module "assets")
 │   └── fastfetch/    # logo.png
 └── fonts/
 ```
+
+## Linux distros
+
+| Distro | Packages | Notes |
+|--------|----------|-------|
+| CachyOS / Arch | pacman + AUR (`packages/aur.txt`) | Everything, incl. Noctalia, SDDM/Limine theming, Helium, Proton VPN |
+| Fedora | dnf | niri via COPR `yalter/niri` if not in the repos; Ghostty via COPR |
+| Ubuntu | apt | Hyprland/niri from PPAs or source when the release lacks them; VS Code, Brave, Tailscale, Obsidian (Flatpak) from their own sources |
+| Kali / Debian | apt | Same as Ubuntu, plus the pentest tools Kali ships; `DOTS_KALI_META=1 ./install.sh packages` adds the `kali-tools-*` sets |
+
+`packages/linux.txt` is one table (`name arch ubuntu kali fedora`): a cell can
+list alternatives (`a|b`) or `-` for "not packaged here". Names a distro
+doesn't have are skipped with a warning, never fatal. Skip groups with
+`DOTS_SKIP_GROUPS=security,apps ./install.sh packages`; force a distro with
+`DOTS_DISTRO=ubuntu`.
+
+Compositors: Niri and Hyprland are both installed and configured (the Hyprland
+step deploys the Lua config for 0.55+ and the hyprlang one for older
+versions). Terminals: kitty, foot, ghostty. Launcher: Rofi.
+
+## Theming
+
+`configs/theme` holds the one palette every config reads. `theme-apply`
+derives it from the wallpaper and renders colour files for kitty, foot,
+ghostty, rofi, Hyprland, niri and fish; each app's config includes its file.
+
+```shell
+theme-apply ~/Pictures/Wallpapers/6.png   # use this wallpaper + re-theme
+theme-apply --random                      # Mod+Shift+W
+theme-apply --pick                        # Mod+W (rofi menu)
+theme-apply --render                      # after editing ~/.config/theme/theme.conf by hand
+```
+
+Add wallpapers to `assets/wallpapers/` and re-run `./install.sh assets`.
+Noctalia (Arch only) keeps its own palette for the bar and panels.
 
 ## Usage
 

@@ -1,0 +1,128 @@
+# Linux packages for every supported distro. One row per tool.
+#
+#   name           arch/cachyos         ubuntu               kali/debian            fedora
+#
+#   "-"          not packaged in that distro's repos (see the third-party
+#                step, functions/19-third-party.sh, for the ones it covers)
+#   "a|b"        alternatives -- the first one the repos actually have wins
+#   [group]      installer groups; skip some with e.g.
+#                DOTS_SKIP_GROUPS=security,apps ./install.sh packages
+#
+# Names that fail to resolve are skipped with a warning, never fatal.
+# Kali is Debian-based, so "debian" uses the kali column.
+
+[core]
+git            git                  git                  git                    git
+curl           curl                 curl                 curl                   curl
+wget           wget                 wget                 wget                   wget
+unzip          unzip                unzip                unzip                  unzip
+tar            tar                  tar                  tar                    tar
+gcc            gcc                  gcc                  gcc                    gcc
+make           make                 make                 make                   make
+cmake          cmake                cmake                cmake                  cmake
+gdb            gdb                  gdb                  gdb                    gdb
+python         python               python3              python3                python3
+pip            python-pip           python3-pip          python3-pip            python3-pip
+pillow         python-pillow        python3-pil          python3-pil            python3-pillow
+go             go                   golang-go            golang-go              golang
+rustup         rustup               rustup               rustup                 rustup
+fish           fish                 fish                 fish                   fish
+neovim         neovim               neovim               neovim                 neovim
+starship       starship             starship             starship               starship
+fastfetch      fastfetch            fastfetch            fastfetch              fastfetch
+fzf            fzf                  fzf                  fzf                    fzf
+ripgrep        ripgrep              ripgrep              ripgrep                ripgrep
+fd             fd                   fd-find              fd-find                fd-find
+bat            bat                  bat                  bat                    bat
+eza            eza                  eza                  eza                    eza
+zoxide         zoxide               zoxide               zoxide                 zoxide
+jq             jq                   jq                   jq                     jq
+tmux           tmux                 tmux                 tmux                   tmux
+lazygit        lazygit              -                    -                      lazygit
+github-cli     github-cli           gh                   gh                     gh
+adb            android-tools        adb                  adb                    android-tools
+fontconfig     fontconfig           fontconfig           fontconfig             fontconfig
+
+# --- Wayland desktop: both compositors, launcher, terminals --------------
+# Ubuntu/Kali/Debian may not ship these (or ship them old); the
+# compositor steps (07-hyprland, 08-niri) add a PPA / COPR / source build
+# when the plain package is missing.
+[desktop]
+hyprland       hyprland             hyprland             hyprland               hyprland
+niri           niri                 niri                 niri                   niri
+xwayland       xorg-xwayland        xwayland             xwayland               xorg-x11-server-Xwayland
+xwayland-satellite  xwayland-satellite  -                -                      xwayland-satellite
+rofi           rofi|rofi-wayland    rofi-wayland|rofi    rofi-wayland|rofi      rofi-wayland|rofi
+kitty          kitty                kitty                kitty                  kitty
+foot           foot                 foot                 foot                   foot
+ghostty        ghostty              -                    -                      -
+swaybg         swaybg               swaybg               swaybg                 swaybg
+wl-clipboard   wl-clipboard         wl-clipboard         wl-clipboard           wl-clipboard
+cliphist       cliphist             cliphist             cliphist               cliphist
+grim           grim                 grim                 grim                   grim
+slurp          slurp                slurp                slurp                  slurp
+thunar         thunar               thunar               thunar                 Thunar
+portal-gtk     xdg-desktop-portal-gtk        xdg-desktop-portal-gtk        xdg-desktop-portal-gtk        xdg-desktop-portal-gtk
+portal-hypr    xdg-desktop-portal-hyprland   xdg-desktop-portal-hyprland   xdg-desktop-portal-hyprland   xdg-desktop-portal-hyprland
+polkit-agent   polkit-gnome         policykit-1-gnome|polkit-kde-agent-1  policykit-1-gnome|polkit-kde-agent-1  polkit-gnome
+notifications  mako                 mako-notifier        mako-notifier          mako
+emoji-font     noto-fonts-emoji     fonts-noto-color-emoji  fonts-noto-color-emoji  google-noto-color-emoji-fonts
+jetbrains-nf   ttf-jetbrains-mono-nerd  -                -                      -
+
+# --- Everyday apps ----------------------------------------------------------
+# Not in the repos on every distro; functions/19-third-party.sh covers the
+# gaps (Obsidian via Flatpak, Brave/VS Code Insiders/Tailscale via the
+# vendors' own repos).
+[apps]
+vlc            vlc                  vlc                  vlc                    vlc
+handbrake      handbrake            handbrake            handbrake              -
+zathura        zathura              zathura              zathura                zathura
+zathura-pdf    zathura-pdf-mupdf    zathura-pdf-mupdf|zathura-pdf-poppler    zathura-pdf-mupdf|zathura-pdf-poppler    zathura-pdf-mupdf|zathura-pdf-poppler
+okular         okular               okular               okular                 okular
+obsidian       obsidian             -                    -                      -
+docker         docker               docker.io            docker.io              moby-engine
+docker-compose docker-compose       docker-compose-v2|docker-compose  docker-compose  docker-compose
+tailscale      tailscale            -                    -                      -
+proton-vpn     proton-vpn-gtk-app   -                    -                      -
+
+# --- Security / pentest -----------------------------------------------------
+# Kali ships most of these; Ubuntu/Fedora/Arch have a subset. Missing ones
+# are skipped. Tools that only exist on Kali: metasploit-framework,
+# burpsuite, zaproxy, netexec, responder, evil-winrm, bloodhound, ...
+# (the rest is reachable through pipx/GitHub -- see README).
+[security]
+nmap           nmap                 nmap                 nmap                   nmap
+wireshark      wireshark-qt         wireshark            wireshark              wireshark
+tcpdump        tcpdump              tcpdump              tcpdump                tcpdump
+sqlmap         sqlmap               sqlmap               sqlmap                 sqlmap
+hydra          hydra                hydra                hydra                  hydra
+john           john                 john                 john                   john
+hashcat        hashcat              hashcat              hashcat                hashcat
+nikto          nikto                nikto                nikto                  nikto
+gobuster       gobuster             gobuster             gobuster               gobuster
+ffuf           ffuf                 ffuf                 ffuf                   ffuf
+feroxbuster    feroxbuster          -                    feroxbuster            -
+dirb           dirb                 dirb                 dirb                   -
+seclists       seclists             seclists             seclists               -
+mitmproxy      mitmproxy            mitmproxy            mitmproxy              mitmproxy
+proxychains    proxychains-ng       proxychains4         proxychains4           proxychains-ng
+socat          socat                socat                socat                  socat
+netcat         openbsd-netcat       netcat-openbsd       netcat-traditional     nmap-ncat
+dnsutils       bind                 dnsutils             dnsutils               bind-utils
+whois          whois                whois                whois                  whois
+openvpn        openvpn              openvpn              openvpn                openvpn
+wireguard      wireguard-tools      wireguard-tools      wireguard-tools        wireguard-tools
+exiftool       perl-image-exiftool  libimage-exiftool-perl  libimage-exiftool-perl  perl-Image-ExifTool
+binwalk        binwalk              binwalk              binwalk                binwalk
+radare2        radare2              radare2              radare2                radare2
+apktool        apktool              apktool              apktool                -
+jadx           jadx                 -                    jadx                   -
+ghidra         ghidra               -                    ghidra                 -
+metasploit     -                    -                    metasploit-framework   -
+burpsuite      -                    -                    burpsuite              -
+zaproxy        -                    -                    zaproxy                -
+netexec        -                    -                    netexec                -
+impacket       -                    -                    python3-impacket|impacket-scripts  -
+responder      -                    -                    responder              -
+evil-winrm     -                    -                    evil-winrm             -
+bloodhound     -                    -                    bloodhound             -

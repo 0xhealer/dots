@@ -1,0 +1,7 @@
+#!/usr/bin/env bash
+# dots-browser [args...] -- first browser that is installed.
+for b in "${DOTS_BROWSER:-}" helium-browser brave-browser brave firefox chromium google-chrome-stable; do
+    [ -n "$b" ] && command -v "$b" > /dev/null && exec "$b" "$@"
+done
+echo "dots-browser: no browser found" >&2
+exit 1
