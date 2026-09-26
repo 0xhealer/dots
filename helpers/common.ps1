@@ -129,3 +129,54 @@ function Get-PackageList {
             -not $_.Trim().StartsWith('#')
         }
 }
+function Remove-AppxPatterns {
+    <#
+      Removes installed + provisioned Appx packages matching wildcard names.
+      Runs in Windows PowerShell 5.1: the Appx/DISM cmdlets are unreliable
+      (often silently do nothing) when invoked from PowerShell 7.
+    #>
+    param(
+        [Parameter(Mandatory)][string[]]$Patterns,
+        [string[]]$Keep = @()
+    )
+
+    # Framework/runtime packages other things (winget, Store apps) depend on.
+    $Protected = @(
+        'Microsoft.DesktopAppInstaller', 'Microsoft.VCLibs*', 'Microsoft.UI.Xaml*',
+        'Microsoft.NET.Native*', 'Microsoft.WindowsAppRuntime*', 'Microsoft.WinAppRuntime*',
+        'Microsoft.SecHealthUI', 'Microsoft.StorePurchaseApp'
+    )
+
+    $Q = { param($a) ($a | ForEach-Object { "'" + ($_ -replace "'", "''") + "'" }) -join ',' }
+    $Script = @"
+`$ErrorActionPreference = 'SilentlyContinue'
+`$Patterns  = @($(& $Q $Patterns))
+`$Keep      = @($(& $Q ($Keep + $Protected)))
+function Skip(`$n) { foreach (`$k in `$Keep) { if (`$n -like `$k) { return `$true } }; return `$false }
+foreach (`$p in `$Patterns) {
+    Get-AppxPackage -AllUsers | Where-Object { `$_.Name -like `$p -and -not (Skip `$_.Name) } | ForEach-Object {
+        Write-Output ('[REMOVE] ' + `$_.Name)
+        Remove-AppxPackage -Package `$_.PackageFullName -AllUsers
+        if (Get-AppxPackage -Name `$_.Name) { Remove-AppxPackage -Package `$_.PackageFullName }
+    }
+    Get-AppxProvisionedPackage -Online | Where-Object { `$_.DisplayName -like `$p -and -not (Skip `$_.DisplayName) } | ForEach-Object {
+        Remove-AppxProvisionedPackage -Online -AllUsers -PackageName `$_.PackageName | Out-Null
+    }
+}
+foreach (`$p in `$Patterns) {
+    Get-AppxPackage -AllUsers | Where-Object { `$_.Name -like `$p -and -not (Skip `$_.Name) } |
+        ForEach-Object { Write-Output ('[LEFTOVER] ' + `$_.Name) }
+}
+"@
+
+    $Tmp = Join-Path $env:TEMP ("appx-remove-{0}.ps1" -f [guid]::NewGuid())
+    Set-Content -Path $Tmp -Value $Script -Encoding UTF8
+    try {
+        & "$env:SystemRoot\System32\WindowsPowerShell\v1.0\powershell.exe" `
+            -NoProfile -NonInteractive -ExecutionPolicy Bypass -File $Tmp 2>&1 |
+            ForEach-Object { Write-Host "$_" }
+    }
+    finally {
+        Remove-Item $Tmp -Force -ErrorAction SilentlyContinue
+    }
+}

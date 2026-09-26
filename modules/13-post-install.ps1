@@ -4,6 +4,7 @@ $ErrorActionPreference = 'Stop'
 Write-ModuleHeader "Post Install Configuration"
 
 # -----------------------------------------------------------------------------
+# -----------------------------------------------------------------------------
 # WSL2
 # -----------------------------------------------------------------------------
 
@@ -33,13 +34,13 @@ foreach ($Feature in $Features) {
     Write-Host "[ENABLE] $Feature"
 
     try {
-        Enable-WindowsOptionalFeature `
+        $Result = Enable-WindowsOptionalFeature `
             -Online `
             -FeatureName $Feature `
             -All `
             -NoRestart `
-            -ErrorAction Stop | Out-Null
-
+            -ErrorAction Stop
+        if ($Result.RestartNeeded) { $RestartRequired = $true }
         $RestartRequired = $true
     }
     catch {
@@ -47,27 +48,44 @@ foreach ($Feature in $Features) {
     }
 }
 
-if (-not $RestartRequired) {
-    if (Get-Command wsl.exe -ErrorAction SilentlyContinue) {
-        try {
-            Write-Host "[CONFIG] Setting WSL2 as the default version"
-            wsl --set-default-version 2 | Out-Null
-        }
-        catch {
-            Write-Warning "Failed to set the default WSL version to 2."
-        }
+# Docker Desktop refuses to start unless the WSL *package* is current
+# ("WSL must be updated ... wsl.exe --update"). Enabling the Windows features
+# alone is not enough. wsl.exe prints UTF-16, so its output is not captured.
+function Update-Wsl {
+    if (-not (Get-Command wsl.exe -ErrorAction SilentlyContinue)) {
+        Write-Warning "wsl.exe is not available yet."
+        return $false
     }
-    else {
-        Write-Warning "wsl.exe is not available. A reboot may be required before WSL can be configured."
-    }
+    Write-Host "[UPDATE] WSL (wsl --update)"
+    & wsl.exe --update --web-download
+    if ($LASTEXITCODE -ne 0) { & wsl.exe --update }
+    $Ok = ($LASTEXITCODE -eq 0)
+    & wsl.exe --set-default-version 2
+    return $Ok
+}
 
+if (Update-Wsl) {
     Write-Host "[SUCCESS] WSL2 configured" -ForegroundColor Green
 }
 else {
-    Write-Host ""
-    Write-Host "[INFO] Windows features have been enabled." -ForegroundColor Yellow
-    Write-Host "[INFO] Restart Windows and rerun the installer to complete WSL2 configuration." -ForegroundColor Yellow
+    Write-Warning "WSL update did not complete."
 }
+
+if ($RestartRequired) {
+    # Finish the WSL update automatically at next logon, after the reboot.
+    try {
+        $Cmd = '-NoProfile -WindowStyle Hidden -Command "wsl.exe --update --web-download; if ($LASTEXITCODE -ne 0) { wsl.exe --update }; wsl.exe --set-default-version 2; Unregister-ScheduledTask -TaskName DotsWslUpdate -Confirm:$false"'
+        $Action  = New-ScheduledTaskAction -Execute "powershell.exe" -Argument $Cmd
+        $Trigger = New-ScheduledTaskTrigger -AtLogOn
+        $Princ   = New-ScheduledTaskPrincipal -UserId "$env:USERDOMAIN\$env:USERNAME" -RunLevel Highest
+        Register-ScheduledTask -TaskName "DotsWslUpdate" -Action $Action -Trigger $Trigger -Principal $Princ -Force | Out-Null
+        Write-Host "[INFO] Windows features enabled. Reboot needed; WSL will finish updating at next logon." -ForegroundColor Yellow
+    }
+    catch {
+        Write-Warning "Could not schedule post-reboot WSL update - run 'wsl --update' after restarting."
+    }
+}
+
 
 # -----------------------------------------------------------------------------
 # OneDrive
@@ -172,43 +190,32 @@ Write-Host "[SUCCESS] OneDrive removed" -ForegroundColor Green
 
 Write-Host "[REMOVE] Consumer apps" -ForegroundColor Yellow
 
+# Package-name wildcards to KEEP even if a pattern below matches them.
+$KeepApps = @()
+
 $Packages = @(
-    "*Xbox*","*Gaming*","*Clipchamp*","*MicrosoftTeams*","*Skype*","*Solitaire*",
+    "*Xbox*","*Gaming*","*Clipchamp*","*MicrosoftTeams*","*MSTeams*","*Skype*","*Solitaire*",
     "*WindowsMaps*","*GetHelp*","*GetStarted*","*OfficeHub*","*DevHome*",
     "*BingNews*","*WindowsFeedbackHub*","*Microsoft.Todos*","*People*",
     "*MixedReality*","*MicrosoftStickyNotes*","*Microsoft.BingWeather*",
     "*Microsoft.WindowsAlarms*","*Microsoft.WindowsSoundRecorder*",
     "*Microsoft.PowerAutomateDesktop*","*Microsoft.OutlookForWindows*",
-    "*MicrosoftCorporationII.MicrosoftFamily*","*Microsoft.549981C3F5F10*"
+    "*MicrosoftCorporationII.MicrosoftFamily*","*Microsoft.549981C3F5F10*",
+    "*Microsoft.MicrosoftOfficeHub*","*Microsoft.Windows.Photos*","*Microsoft.WindowsCalculator*",
+    "*Microsoft.WindowsNotepad*","*Microsoft.ScreenSketch*","*Microsoft.Paint*","*Microsoft.MSPaint*",
+    "*WhatsAppDesktop*","*5319275A.WhatsApp*","*LinkedInforWindows*","*7EE7776C.LinkedIn*",
+    "*Microsoft.ZuneVideo*","*Microsoft.WindowsCamera*","*Microsoft.MicrosoftJournal*",
+    "*Microsoft.Windows.DevHome*","*MicrosoftWindows.CrossDevice*","*Microsoft.Copilot*",
+    "*Microsoft.Windows.Copilot*","*Microsoft.BingSearch*","*Microsoft.Getstarted*",
+    "*Microsoft.WidgetsPlatformRuntime*","*MicrosoftWindows.Client.WebExperience*",
+    "*Microsoft.StartExperiencesApp*","*MicrosoftCorporationII.QuickAssist*",
+    "*Microsoft.MicrosoftEdge.Stable*","*Microsoft.Edge.GameAssist*",
+    "*Microsoft.M365Companions*","*Microsoft.ApplicationCompatibilityEnhancements*",
+    "*Microsoft.Windows.ParentalControls*","*Microsoft.OneDriveSync*"
 )
 
-foreach ($Pattern in $Packages) {
-    Get-AppxPackage -AllUsers -ErrorAction SilentlyContinue |
-        Where-Object Name -like $Pattern |
-        ForEach-Object {
-            $PName = $_.Name
-            $PFullName = $_.PackageFullName
-            try {
-                Remove-AppxPackage -Package $PFullName -AllUsers -ErrorAction Stop
-            }
-            catch {
-                Write-Warning "Failed to remove package $PName - $($_.Exception.Message)"
-            }
-        }
+Remove-AppxPatterns -Patterns $Packages -Keep $KeepApps
 
-    Get-AppxProvisionedPackage -Online -ErrorAction SilentlyContinue |
-        Where-Object DisplayName -like $Pattern |
-        ForEach-Object {
-            $PName = $_.DisplayName
-            $PPackageName = $_.PackageName
-            try {
-                Remove-AppxProvisionedPackage -Online -PackageName $PPackageName -ErrorAction Stop | Out-Null
-            }
-            catch {
-                Write-Warning "Failed to remove provisioned package $PName - $($_.Exception.Message)"
-            }
-        }
-}
 
 # -----------------------------------------------------------------------------
 # Copilot - disable AND remove completely
@@ -239,37 +246,9 @@ catch {
     Write-Warning "Failed to set user-level Copilot policy - $($_.Exception.Message)"
 }
 
-# 3. Completely Uninstall the Copilot App Package
-$CopilotPattern = "*Copilot*"
+# 3. Uninstall the Copilot app packages (Windows PowerShell 5.1 subprocess)
+Remove-AppxPatterns -Patterns @("*Copilot*") -Keep $KeepApps
 
-Get-AppxPackage -AllUsers -ErrorAction SilentlyContinue |
-    Where-Object Name -like $CopilotPattern |
-    ForEach-Object {
-        $PName = $_.Name
-        $PFullName = $_.PackageFullName
-        try {
-            Remove-AppxPackage -Package $PFullName -AllUsers -ErrorAction Stop
-            Write-Host "[REMOVE] Removed Appx Package: $PName"
-        }
-        catch {
-            Write-Warning "Failed to remove Copilot package $PName - $($_.Exception.Message)"
-        }
-    }
-
-# 4. Remove Provisioned Package
-Get-AppxProvisionedPackage -Online -ErrorAction SilentlyContinue |
-    Where-Object DisplayName -like $CopilotPattern |
-    ForEach-Object {
-        $PName = $_.DisplayName
-        $PPackageName = $_.PackageName
-        try {
-            Remove-AppxProvisionedPackage -Online -PackageName $PPackageName -ErrorAction Stop | Out-Null
-            Write-Host "[REMOVE] Removed Provisioned Package: $PName"
-        }
-        catch {
-            Write-Warning "Failed to remove provisioned Copilot package $PName - $($_.Exception.Message)"
-        }
-    }
 
 Write-Host "[SUCCESS] Windows Copilot has been completely removed and disabled" -ForegroundColor Green
 
@@ -278,9 +257,9 @@ Write-Host "[SUCCESS] Windows Copilot has been completely removed and disabled" 
 # (OneDrive, Copilot and overlapping consumer-app removal are handled above)
 # =============================================================================
 
-$RemoveXbox   = $false
-$RemoveStore  = $false
-$RemoveEdge   = $false
+$RemoveXbox   = $true
+$RemoveStore  = $true
+$RemoveEdge   = $true
 $SetGoogleDns = $true
 
 Write-Host "[INFO] Applying WinScript tweaks..." -ForegroundColor Yellow
@@ -323,45 +302,22 @@ $ExtraPackages = @(
 if ($RemoveXbox)  { $ExtraPackages += "*Xbox*","*Microsoft.GamingApp*" }
 if ($RemoveStore) { $ExtraPackages += "*Microsoft.WindowsStore*" }
 
-foreach ($Pattern in $ExtraPackages) {
-    Get-AppxPackage -AllUsers -ErrorAction SilentlyContinue |
-        Where-Object Name -like $Pattern |
-        ForEach-Object {
-            $PName = $_.Name
-            $PFullName = $_.PackageFullName
-            try {
-                Remove-AppxPackage -Package $PFullName -AllUsers -ErrorAction Stop
-                Write-Host "[REMOVE] $PName"
-            }
-            catch {
-                Write-Warning "Failed to remove $PName - $($_.Exception.Message)"
-            }
-        }
-
-    Get-AppxProvisionedPackage -Online -ErrorAction SilentlyContinue |
-        Where-Object DisplayName -like $Pattern |
-        ForEach-Object {
-            $PName = $_.DisplayName
-            $PPackageName = $_.PackageName
-            try {
-                Remove-AppxProvisionedPackage -Online -PackageName $PPackageName -ErrorAction Stop | Out-Null
-            }
-            catch {
-                Write-Warning "Failed to remove provisioned $PName - $($_.Exception.Message)"
-            }
-        }
-}
+Remove-AppxPatterns -Patterns $ExtraPackages -Keep $KeepApps
 
 # --- Optional: Edge ---
 if ($RemoveEdge) {
     Write-Host "[REMOVE] Microsoft Edge" -ForegroundColor Yellow
-    $EdgeSetup = Get-ChildItem "C:\Program Files (x86)\Microsoft\Edge\Application\*\Installer\setup.exe" -ErrorAction SilentlyContinue | Select-Object -First 1
+    Get-Process msedge -ErrorAction SilentlyContinue | Stop-Process -Force -ErrorAction SilentlyContinue
+    $EdgeSetup = Resolve-Path "${env:ProgramFiles(x86)}\Microsoft\Edge\Application\*\Installer\setup.exe" -ErrorAction SilentlyContinue | Select-Object -Last 1
     if ($EdgeSetup) {
-        New-Item "C:\Windows\SystemApps\Microsoft.MicrosoftEdge_8wekyb3d8bbwe\MicrosoftEdge.exe" -Force | Out-Null
-        Start-Process $EdgeSetup.FullName -ArgumentList '--uninstall --system-level --force-uninstall --delete-profile' -Wait
+        $Stub = "$env:SystemRoot\SystemApps\Microsoft.MicrosoftEdge_8wekyb3d8bbwe\MicrosoftEdge.exe"
+        New-Item -Path $Stub -Force -ErrorAction SilentlyContinue | Out-Null
+        Start-Process -FilePath $EdgeSetup.Path -ArgumentList '--uninstall --system-level --force-uninstall --delete-profile' -Wait
+        Remove-Item "$env:SystemDrive\Users\Public\Desktop\Microsoft Edge.lnk" -Force -ErrorAction SilentlyContinue
+        Set-Reg "HKLM:\SOFTWARE\Policies\Microsoft\EdgeUpdate" "DoNotUpdateToEdgeWithChromium" 1
     }
     else {
-        Write-Warning "Edge installer not found"
+        Write-Warning "Edge installer not found (already removed?)"
     }
 }
 

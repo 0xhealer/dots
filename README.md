@@ -89,3 +89,7 @@ Run a subset of steps by name (works the same on both platforms):
 Step names are the file names without the number prefix
 (`functions/04-starship.sh` -> `starship`). `pull-noctalia-settings` is
 opt-in: it only runs when named explicitly.
+
+## Credits
+
+[ChrisTitusTech](https://github.com/ChrisTitusTech/winutil)
