@@ -106,6 +106,14 @@ Copy-Item `
     -Recurse `
     -Force
 
+# Remove-Bloatware (configs\powershell\functions\system.ps1) runs the
+# post-install module on demand, so keep a copy of it and its helper next to
+# run.ps1 (which was copied with the tree above).
+$BloatDir = Join-Path $ConfigRoot "bloatware"
+New-Item -ItemType Directory -Path $BloatDir -Force | Out-Null
+Copy-Item (Join-Path $Global:DotfilesRoot "helpers\common.ps1") (Join-Path $BloatDir "common.ps1") -Force
+Copy-Item (Join-Path $Global:DotfilesRoot "modules\13-post-install.ps1") (Join-Path $BloatDir "post-install.ps1") -Force
+
 Write-Host "[SUCCESS] PowerShell configured successfully." -ForegroundColor Green
 Write-Host "Bootstrap profiles created:" -ForegroundColor DarkGray
 Write-Host "  - $PwshProfile" -ForegroundColor DarkGray

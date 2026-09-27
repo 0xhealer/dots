@@ -58,3 +58,47 @@ function install_tools {
     Write-Host "Tools installation complete!"
     Write-Host "Reload your profile with: reload"
 }
+
+# ----------------------------------------------------------------------------
+# Remove-Bloatware (alias: debloat)
+# Runs the same post-install module the installer uses: removes consumer/
+# preinstalled apps, Copilot/Recall/AI, Edge, OneDrive, telemetry, and applies
+# the privacy/UI tweaks. Elevates itself (UAC prompt) and runs in a new window.
+# ----------------------------------------------------------------------------
+function Remove-Bloatware {
+    $Dir = Join-Path $HOME '.config\powershell\bloatware'
+    $Files = @{
+        'run.ps1'          = 'configs/powershell/bloatware/run.ps1'
+        'common.ps1'       = 'helpers/common.ps1'
+        'post-install.ps1' = 'modules/13-post-install.ps1'
+    }
+
+    # Self-heal: fetch anything missing from the repo.
+    foreach ($Name in $Files.Keys) {
+        $Path = Join-Path $Dir $Name
+        if (-not (Test-Path $Path)) {
+            try {
+                New-Item -ItemType Directory -Path $Dir -Force | Out-Null
+                $Url = "https://raw.githubusercontent.com/0xhealer/dots/main/$($Files[$Name])"
+                Invoke-WebRequest -UseBasicParsing -Uri $Url -OutFile $Path
+            }
+            catch {
+                Write-Host "[ERROR] Could not get $Name - $($_.Exception.Message)" -ForegroundColor Red
+                return
+            }
+        }
+    }
+
+    $Run = Join-Path $Dir 'run.ps1'
+    $Shell = if (Get-Command pwsh -ErrorAction SilentlyContinue) { 'pwsh' } else { 'powershell' }
+    $ShellArgs = @('-NoProfile', '-ExecutionPolicy', 'Bypass', '-File', "`"$Run`"")
+
+    $Principal = [Security.Principal.WindowsPrincipal]::new([Security.Principal.WindowsIdentity]::GetCurrent())
+    if ($Principal.IsInRole([Security.Principal.WindowsBuiltInRole]::Administrator)) {
+        & $Shell @ShellArgs
+    }
+    else {
+        Start-Process -FilePath $Shell -ArgumentList $ShellArgs -Verb RunAs
+    }
+}
+Set-Alias -Name debloat -Value Remove-Bloatware
