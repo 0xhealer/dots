@@ -16,6 +16,17 @@ winget source update --disable-interactivity
 
 $Failed = @()
 
+# Vendors whose manifest points at an unversioned "latest" download URL: the
+# file changes without the manifest's hash being updated, so winget refuses it
+# with 0x8A150011 (hash mismatch). For these only, retry once with the hash
+# check overridden. (Everything else keeps full verification.)
+$HashMismatch = -1978335215
+$HashOverrideAllowed = @(
+  'RazerInc.RazerInstaller.Synapse4'
+  'Google.GoogleDrive'
+  'Foxit.FoxitReader'
+)
+
 foreach ($Package in $Packages) {
 
     Write-Host "`n[PROCESS] $Package" -ForegroundColor Cyan
@@ -31,6 +42,19 @@ foreach ($Package in $Packages) {
         --source winget `
         --accept-source-agreements `
         --accept-package-agreements
+
+    if ($LASTEXITCODE -eq $HashMismatch -and $Package -in $HashOverrideAllowed) {
+        Write-Host "[WARN] Installer hash mismatch for $Package (vendor updated the file) - retrying with the hash check overridden" -ForegroundColor Yellow
+        winget settings --enable InstallerHashOverride | Out-Null
+        & winget install `
+            --id $Package `
+            -e `
+            --silent `
+            --source winget `
+            --accept-source-agreements `
+            --accept-package-agreements `
+            --ignore-security-hash
+    }
 
     # -1978335189 (0x8A15002B) = "no applicable update": already installed.
     # -1978335135 (0x8A150061) = "package already installed".
