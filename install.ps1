@@ -88,6 +88,35 @@ $ModulePath = Join-Path `
     "modules"
 
 # -----------------------------------------------------------------------------
+# Logging
+# -----------------------------------------------------------------------------
+# Full transcript of this run (every line printed below, from every module)
+# to Desktop\logs\log-<date>-<time>.log, so a failure can be diagnosed after
+# the window closes. Best-effort: a machine with no Desktop folder, or a
+# transcript already running from an outer script, should not stop the
+# install.
+
+$LogDir = Join-Path ([Environment]::GetFolderPath("Desktop")) "logs"
+
+$Global:DotsLogFile = $null
+
+try {
+    New-Item -ItemType Directory -Path $LogDir -Force | Out-Null
+    $LogFile = Join-Path $LogDir "log-$(Get-Date -Format 'yyyy-MM-dd-HHmmss').log"
+    Start-Transcript -Path $LogFile -Append | Out-Null
+    $Global:DotsLogFile = $LogFile
+}
+catch {
+    Write-Warning "Could not start a log file - continuing without one ($($_.Exception.Message))"
+}
+
+function Stop-DotsLog {
+    if ($Global:DotsLogFile) {
+        try { Stop-Transcript | Out-Null } catch {}
+    }
+}
+
+# -----------------------------------------------------------------------------
 # Header
 # -----------------------------------------------------------------------------
 
@@ -215,21 +244,31 @@ if ($FailedModules.Count -gt 0) {
         "Fix the cause, then re-run only those, e.g.: .\install.ps1 -Modules <name>" `
         -ForegroundColor Yellow
 
+    if ($Global:DotsLogFile) {
+        Write-Host "Log saved to: $($Global:DotsLogFile)" -ForegroundColor DarkGray
+    }
+
     # This window is a relaunched, elevated one - keep it open so the
     # errors above can actually be read.
     Read-Host "Press Enter to close" | Out-Null
 
+    Stop-DotsLog
     exit 1
 }
 
 Write-ModuleHeader `
     "Installation Complete"
 
+if ($Global:DotsLogFile) {
+    Write-Host "Log saved to: $($Global:DotsLogFile)" -ForegroundColor DarkGray
+}
+
 if ($Modules) {
 
     # Partial run (-Modules ...): never reboot the machine for that.
     Read-Host "Press Enter to close" | Out-Null
 
+    Stop-DotsLog
     exit 0
 }
 
@@ -238,4 +277,5 @@ Write-Host "Restarting in 15 seconds to finish setup - press Ctrl+C to cancel." 
 
 Start-Sleep -Seconds 15
 
+Stop-DotsLog
 Restart-Computer -Force

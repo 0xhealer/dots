@@ -31,6 +31,24 @@ fi
 source "$COMMON_HELPERS"
 
 # -----------------------------------------------------------------------
+# Logging
+# -----------------------------------------------------------------------
+# Full transcript of this run to ~/Desktop/logs/log-<date>-<time>.log, so a
+# failure can be diagnosed after the terminal closes. Best-effort: a machine
+# with no Desktop folder (or one that can't be created) just runs without a
+# log file instead of failing the install.
+LOG_DIR="$HOME/Desktop/logs"
+if mkdir -p "$LOG_DIR" 2> /dev/null; then
+    LOG_FILE="$LOG_DIR/log-$(date +%Y-%m-%d-%H%M%S).log"
+    # `tee` keeps showing everything on the terminal too; sudo's own password
+    # prompt talks to /dev/tty directly, so it is unaffected by this.
+    exec > >(tee -a "$LOG_FILE") 2>&1
+    echo "Logging this run to: $LOG_FILE"
+else
+    echo "Could not create ${LOG_DIR} -- continuing without a log file" >&2
+fi
+
+# -----------------------------------------------------------------------
 # Sudo, entered once
 # -----------------------------------------------------------------------
 # Individual steps (pacman, yay bootstrap) call sudo separately. Without

@@ -51,6 +51,13 @@ A failing step no longer stops the run (except `prerequisites`); failures
 are listed at the end and the installer exits non-zero. Re-run just those
 steps by name.
 
+## Logs
+
+Every run writes a full transcript to `logs/` on the Desktop, named
+`log-<date>-<time>.log` (`log-2026-09-27-124512.log`) -- Windows:
+`Desktop\logs`, Linux: `~/Desktop/logs`. Best-effort: a machine with no
+Desktop folder just runs without one instead of failing the install.
+
 ## Layout
 
 ```
