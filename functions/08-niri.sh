@@ -13,7 +13,13 @@ build_niri_from_source() {
         libwayland-dev libinput-dev libdbus-1-dev libsystemd-dev libseat-dev \
         libpipewire-0.3-dev libpango1.0-dev libdisplay-info-dev git curl
 
-    if ! test_command_exists cargo; then
+    # A `cargo` shim can exist on PATH (rustup installs one even before a
+    # toolchain is selected) while still failing at invocation time with
+    # "could not choose a version of cargo to run... no default is
+    # configured". Checking `command -v cargo` alone missed that case, so
+    # actually invoke it and fall through to `rustup default stable`
+    # whenever it does not work.
+    if ! test_command_exists cargo || ! cargo --version > /dev/null 2>&1; then
         if test_command_exists rustup; then
             rustup default stable
         else
@@ -21,6 +27,11 @@ build_niri_from_source() {
         fi
         # shellcheck disable=SC1091
         [ -f "$HOME/.cargo/env" ] && source "$HOME/.cargo/env"
+    fi
+
+    if ! cargo --version > /dev/null 2>&1; then
+        echo -e "\033[31m[ERROR] cargo is still not usable after rustup setup -- aborting niri build\033[0m" >&2
+        return 1
     fi
 
     local src
